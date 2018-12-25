@@ -1,22 +1,24 @@
 module.exports = {
   root: true,
+  parser: 'babel-eslint',
   env: {
     browser: true,
     node: true
   },
-  parserOptions: {
-    parser: 'babel-eslint'
-  },
-  extends: [
-    'plugin:vue/recommended'
-  ],
+  extends: 'standard',
   // required to lint *.vue files
-  plugins: [
-    'vue'
-  ],
+  plugins: ['html'],
   // add your custom rules here
   rules: {
-    'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
-  }
+    'space-before-function-paren': [
+      'error',
+      {
+        anonymous: 'ignore',
+        named: 'ignore',
+        asyncArrow: 'ignore'
+      }
+    ],
+    'generator-star-spacing': 'off' // prettier not support
+  },
+  globals: {}
 }
