@@ -43,8 +43,8 @@ async function start() {
     consola.log('connection')
     socket.on('send_message', function(message) {
       console.log(message)
-      // messages.push(message)
-      // socket.broadcast.emit('new-message', message)
+      messages.push(message)
+      socket.broadcast.emit('new_message', message)
     })
   })
 }

@@ -1,8 +1,8 @@
-var _express = require('express')
+const express = require('express')
 
 // var _users = require('./users');
 
-var router = _express.Router()
+const router = express.Router()
 
 // Add USERS Routes
 // router.use(_users);
