@@ -31,20 +31,38 @@ async function start() {
   app.use(nuxt.render)
 
   // Listen the server
-  server.listen(port, host)
+  server.listen(port)
   consola.ready({
     message: `Server listening on http://${host}:${port}`,
     badge: true
   })
 
   // Socket.io
-  var messages = []
-  io.on('connection', socket => {
-    consola.log('connection')
-    socket.on('send_message', function(message) {
-      console.log(message)
-      messages.push(message)
-      socket.broadcast.emit('new_message', message)
+  let connectionList = {}
+
+  io.on('connection', function(socket) {
+    console.log('connect')
+    const socketId = socket.id
+    connectionList[socketId] = {
+      socket: socket
+    }
+    socket.on('join', function(data) {
+      data.userCount = Object.keys(connectionList).length
+      socket.broadcast.emit('broadcast_join', data)
+      connectionList[socketId].username = data.username
+    })
+    socket.on('disconnect', function() {
+      if (connectionList[socketId].username) {
+        socket.broadcast.emit('broadcast_quit', {
+          userCount: Object.keys(connectionList).length - 1,
+          username: connectionList[socketId].username
+        })
+      }
+      delete connectionList[socketId]
+    })
+
+    socket.on('chat_message', function(msg) {
+      socket.broadcast.emit('chat_message', msg)
     })
   })
 }

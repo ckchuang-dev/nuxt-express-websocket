@@ -12,7 +12,16 @@
               v-for="(message, index) in messages"
               :key="index"
             >
-              <i :title="message.date">{{ message.date.split('T')[1].slice(0, -2) }}</i>: {{ message.text }}
+              <i :title="message.date">
+                {{ message.date }}
+              </i>
+              <i
+                v-if="message.nickname"
+                :title="message.nickname"
+              >
+                {{`${message.nickname}: `}}
+              </i>
+              {{ message.text }}
             </li>
           </ul>
         </div>
@@ -23,52 +32,87 @@
           @keyup.enter="sendMessage"
           placeholder="Type here..."
         />
+        <button @click="sendMessage">送出</button>
       </li>
     </ul>
   </div>
-  <!-- <div>
-    <div class="message">
-      <div class="input_message">
-        <p>訊息：</p>
-        <input
-          v-model="message"
-          type="text"
-          placeholder="Type here"
-          autocomplete="off"
-        />
-      </div>
-
-      <button @click="sendMessage">送出</button>
-    </div>
-  </div> -->
 </template>
 
 <script>
+  import moment from 'moment'
   export default {
+    head: {
+      title: 'Nuxt.js with Socket.io'
+    },
     data() {
       return {
         message: '',
-        messages: []
+        messages: [],
+        nickname: '',
+        nicknameArr: [
+          '鳳山下智久',
+          '哈爾濱崎步',
+          '大坪林俊傑',
+          '三芝田信長',
+          '新竹林七賢',
+          '虎尾田榮一郎',
+          '武當山德勒',
+          '水沙連勝文',
+          '池上戶彩',
+          '清水樹奈奈',
+          '六張黎智英',
+          '二十張無忌'
+        ]
       }
     },
     methods: {
       sendMessage() {
         if (!this.message.trim()) return
         let message = {
-          date: new Date().toJSON(),
-          text: this.message.trim()
+          text: this.message,
+          nickname: this.nickname,
+          date: moment(new Date().toJSON()).format('LTS')
         }
         this.messages.push(message)
+        this.$socket.emit('chat_message', message)
         this.message = ''
-        this.$socket.emit('send_message', message)
       }
     },
-    head: {
-      title: 'Nuxt.js with Socket.io'
-    },
+
     beforeMount() {
-      this.$socket.on('new_message', message => {
-        this.messages.push(message)
+      const nickname = `${this.nicknameArr[Math.floor(12 * Math.random())]}`
+      this.nickname = nickname
+      this.$socket.emit('join', {
+        username: nickname
+      })
+    },
+    mounted() {
+      // 監聽連線訊息
+      this.$socket.on('broadcast_join', data => {
+        // $('#user_count').text(`在線人數：${data.userCount} 人`)
+        this.messages.push({
+          text: `${data.username} 前來報到！`,
+          nickname: '',
+          date: moment(new Date().toJSON()).format('LTS')
+        })
+        window.scrollTo(0, document.body.scrollHeight)
+      })
+
+      // 監聽離線訊息
+      this.$socket.on('broadcast_quit', data => {
+        // $('#user_count').text(`在線人數：${data.userCount} 人`)
+        this.messages.push({
+          text: `${data.username} 已隨風飄逝！`,
+          nickname: '',
+          date: moment(new Date().toJSON()).format('LTS')
+        })
+        window.scrollTo(0, document.body.scrollHeight)
+      })
+
+      // 監聽聊天訊息
+      this.$socket.on('chat_message', msg => {
+        this.messages.push(msg)
+        window.scrollTo(0, document.body.scrollHeight)
       })
     }
   }

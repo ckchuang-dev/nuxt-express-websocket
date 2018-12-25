@@ -1,5 +1,5 @@
 import io from 'socket.io-client'
-const socket = io(process.env.BASE_URL)
+const socket = io()
 
 export default (ctx, inject) => {
   inject('socket', socket)
