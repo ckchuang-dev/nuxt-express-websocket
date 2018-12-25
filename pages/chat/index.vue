@@ -32,7 +32,7 @@
           @keyup.enter="sendMessage"
           placeholder="Type here..."
         />
-        <button @click="sendMessage">送出</button>
+        <!-- <button @click="sendMessage">送出</button> -->
       </li>
     </ul>
   </div>
