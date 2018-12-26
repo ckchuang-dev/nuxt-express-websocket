@@ -24,7 +24,7 @@ module.exports = {
   /*
    ** Global CSS
    */
-  css: [],
+  css: ['~assets/style/main.scss'],
 
   env: {
     BASE_URL: process.env.BASE_URL || 'http://localhost:3000'
