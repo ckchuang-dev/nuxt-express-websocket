@@ -8,6 +8,9 @@
         <li>
           <nuxt-link :to="{name: 'TicTacToe'}">TicTacToe</nuxt-link>
         </li>
+        <li>
+          <nuxt-link :to="{name: 'SingleGuessAB'}">單人猜數字遊戲</nuxt-link>
+        </li>
       </ul>
     </div>
   </section>
