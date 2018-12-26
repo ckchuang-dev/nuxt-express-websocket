@@ -1,7 +1,14 @@
 <template>
   <section class="container">
     <div>
-      <nuxt-link :to="{name: 'chat'}">CHAT</nuxt-link>
+      <ul>
+        <li>
+          <nuxt-link :to="{name: 'chat'}">CHAT</nuxt-link>
+        </li>
+        <li>
+          <nuxt-link :to="{name: 'TicTacToe'}">TicTacToe</nuxt-link>
+        </li>
+      </ul>
     </div>
   </section>
 </template>
