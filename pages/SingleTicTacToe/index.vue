@@ -62,11 +62,6 @@
     computed: {},
     methods: {
       checkWinner() {
-        if (this.stepCount === 9) {
-          this.winner = 2
-          this.turn = 0
-          return
-        }
         for (let i = 0; i < this.winCase.length && this.turn !== 0; i++) {
           const match = this.winCase[i].reduce((accum, curr) => {
             return accum + this.gameList[curr]
@@ -74,10 +69,16 @@
           if (match === 3) {
             this.winner = 1
             this.turn = 0
+            return
           } else if (match === -3) {
             this.winner = -1
             this.turn = 0
+            return
           }
+        }
+        if (this.stepCount === 9) {
+          this.winner = 2
+          this.turn = 0
         }
       },
       selectUnit(i) {
