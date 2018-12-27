@@ -11,6 +11,7 @@
         <input
           type="text"
           v-model="userInput"
+          @keyup.enter="submitGuessing"
         >
         <button @click="submitGuessing">送出</button>
       </div>
@@ -21,10 +22,13 @@
             :key="index"
           >
             <span>第 {{index + 1}} 次猜測：{{item.guess}}</span>
-            <span>{{` ----> `}}</span>
+            <span>{{` --> `}}</span>
             <span>第 {{index + 1}} 次結果：{{item.aCount}} A {{item.bCount}} B</span>
           </li>
         </ul>
+      </div>
+      <div v-if="hit">
+        <h2>恭喜你猜對了！</h2>
       </div>
 
     </div>
@@ -38,9 +42,10 @@
     },
     data() {
       return {
-        anwser: '1234',
+        answer: '1234',
         userInput: '',
-        guessingList: []
+        guessingList: [],
+        hit: false
       }
     },
     methods: {
@@ -48,11 +53,14 @@
         let aCount = 0
         let bCount = 0
         for (let i = 0; i < 4; i++) {
-          if (this.anwser[i] === this.userInput[i]) {
+          if (this.answer[i] === this.userInput[i]) {
             aCount++
-          } else if (this.anwser.indexOf(this.userInput[i]) > -1) {
+          } else if (this.answer.indexOf(this.userInput[i]) > -1) {
             bCount++
           }
+        }
+        if (aCount === 4) {
+          this.hit = true
         }
         return {
           aCount: aCount,
@@ -67,12 +75,28 @@
           bCount: result.bCount
         }
         this.guessingList.push(guessing)
+        this.userInput = ''
+      },
+      generateAnswer() {
+        let pool = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        let result = ''
+        for (let i = 0; i < 4; i++) {
+          const len = pool.length
+          const pivot = Math.floor(Math.random() * len)
+          result += pool[pivot]
+          pool.splice(pivot, 1)
+        }
+        return result
       },
       restartGame() {
-        this.anwser = '1234'
+        this.answer = this.generateAnswer()
         this.userInput = ''
         this.guessingList = []
+        this.hit = false
       }
+    },
+    mounted() {
+      this.answer = this.generateAnswer()
     }
   }
 </script>
