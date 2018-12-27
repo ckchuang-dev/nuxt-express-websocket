@@ -1,45 +1,74 @@
 <template>
-  <div>
+  <div id="pg_single_guessing_number">
     <header>
-      <h1>單人猜數字遊戲</h1>
-      <Button
-        v-if="isFirstGame"
-        @click="startGame"
-      >Start</Button>
-      <Button @click="restartGame">Restart</Button>
       <div>
-        <span>經過時間：</span>
-        <span>{{` ${interval} 秒`}}</span>
+        <h1>1A2B Guessing Number</h1>
+      </div>
+      <div>
+        <Button
+          v-if="!isGameStart && !hit"
+          @click="startGame"
+        >開始遊戲</Button>
+        <Button
+          v-else-if="hit"
+          @click="restartGame"
+        >再來一場</Button>
+        <Button
+          v-else
+          @click="stopGame"
+        >放棄</Button>
       </div>
     </header>
     <hr />
     <div class="container">
-      <div class="user_input">
-        <div>輸入</div>
-        <input
-          type="text"
-          v-model="userInput"
-          @keyup.enter="submitGuessing"
-        >
-        <button @click="submitGuessing">送出</button>
-      </div>
-      <div class="guessing_list">
-        <ul>
-          <li
-            v-for="(item, index) in guessingList"
-            :key="index"
+      <div
+        class="guessing"
+        v-if="isGameStart"
+      >
+        <div class="duration">
+          <span>經過時間：</span>
+          <span>{{` ${duration} 秒`}}</span>
+        </div>
+        <div class="user_input">
+          <span>輸入你的猜測：</span>
+          <input
+            type="text"
+            v-model="userInput"
+            @keyup.enter="submitGuessing"
           >
-            <span>{{`在第 ${item.timeStamp} 秒：`}}</span>
-            <span>第 {{index + 1}} 次猜測：{{item.guess}}</span>
-            <span>{{` --> `}}</span>
-            <span>第 {{index + 1}} 次結果：{{item.aCount}} A {{item.bCount}} B</span>
-          </li>
-        </ul>
+          <button @click="submitGuessing">送出</button>
+        </div>
+        <div class="guessing_list">
+          <ul>
+            <li
+              v-for="(item, index) in guessingList"
+              :key="index"
+            >
+              <span>{{`第 ${item.timeStamp} 秒`}}</span>
+              <span>{{`／`}}</span>
+              <span>第 {{index + 1}} 次猜測：{{item.guess}}</span>
+              <span>{{`／`}}</span>
+              <span>第 {{index + 1}} 次結果：{{item.aCount}} A {{item.bCount}} B</span>
+            </li>
+          </ul>
+        </div>
       </div>
-      <div v-if="hit">
-        <h2>恭喜你猜對了！</h2>
+      <div
+        v-if="hit"
+        class="hit"
+      >
+        <div class="congradulation">恭喜你猜對了！</div>
+        <div class="result">
+          <h2>結果統計</h2>
+          <div>{{`答案：${answer}`}}</div>
+          <div>{{`猜測次數：${guessingList.length}`}}</div>
+          <div v-if="guessingList.length && guessingList[guessingList.length-1]">{{`花費時間：${guessingList[guessingList.length-1].timeStamp}`}}</div>
+        </div>
+        <img
+          src="~/assets/images/good.jpg"
+          alt=""
+        >
       </div>
-
     </div>
   </div>
 </template>
@@ -47,7 +76,7 @@
 <script>
   export default {
     head: {
-      title: '單人猜數字遊戲'
+      title: '1A2B Guessing Number'
     },
     data() {
       return {
@@ -56,8 +85,9 @@
         guessingList: [],
         hit: false,
         startTime: new Date(),
-        isFirstGame: true,
-        interval: 0
+        isGameStart: false,
+        duration: 0,
+        interval: null
       }
     },
     methods: {
@@ -73,6 +103,7 @@
         }
         if (aCount === 4) {
           this.hit = true
+          this.isGameStart = false
         }
         return {
           aCount: aCount,
@@ -85,7 +116,7 @@
           guess: this.userInput,
           aCount: result.aCount,
           bCount: result.bCount,
-          timeStamp: this.interval
+          timeStamp: this.duration
         }
         this.guessingList.push(guessing)
         this.userInput = ''
@@ -103,22 +134,28 @@
       },
       timeCount() {
         const now = new Date()
-        this.interval = Math.round((now - this.startTime) / 1000)
+        this.duration = Math.round((now - this.startTime) / 1000)
       },
       startGame() {
         this.startTime = new Date()
-        this.isFirstGame = false
-        setInterval(() => {
+        this.isGameStart = true
+        this.interval = setInterval(() => {
           this.timeCount()
         }, 1000)
       },
       restartGame() {
+        this.stopGame()
+        this.startGame()
+      },
+      stopGame() {
+        clearInterval(this.interval)
+        this.isGameStart = false
         this.answer = this.generateAnswer()
         this.userInput = ''
         this.guessingList = []
         this.hit = false
         this.startTime = new Date()
-        this.interval = 0
+        this.duration = 0
       }
     }
   }
