@@ -16,7 +16,7 @@
         <Button
           v-else
           @click="stopGame"
-        >放棄</Button>
+        >現在放棄，比賽就結束了</Button>
       </div>
     </header>
     <hr />
