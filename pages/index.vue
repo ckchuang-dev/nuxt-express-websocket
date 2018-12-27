@@ -6,7 +6,7 @@
           <nuxt-link :to="{name: 'chat'}">CHAT</nuxt-link>
         </li>
         <li>
-          <nuxt-link :to="{name: 'TicTacToe'}">TicTacToe</nuxt-link>
+          <nuxt-link :to="{name: 'SingleTicTacToe'}">Single Player TicTacToe Game</nuxt-link>
         </li>
         <li>
           <nuxt-link :to="{name: 'SingleGuessAB'}">單人猜數字遊戲</nuxt-link>
