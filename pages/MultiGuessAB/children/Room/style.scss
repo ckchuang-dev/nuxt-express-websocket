@@ -1,0 +1,49 @@
+#pg_multi_guessing_number {
+}
+
+header {
+  text-align: center;
+  margin: 30px auto;
+  > div {
+    margin: 20px auto;
+  }
+}
+
+.guessing {
+  .duration {
+    text-align: center;
+    margin: 30px auto;
+  }
+  .user_input {
+    text-align: center;
+    text-align: center;
+    margin: 30px auto;
+  }
+  .guessing_list {
+  }
+}
+
+.hit {
+  text-align: center;
+  .congradulation {
+    margin-top: 20px;
+    font-size: 50px;
+    font-weight: 700;
+  }
+  .result {
+    margin: 30px auto;
+    border: 3px solid gray;
+    width: 300px;
+    > div {
+      margin: 10px auto;
+    }
+  }
+}
+
+button {
+  font-size: 20px;
+}
+
+input {
+  font-size: 20px;
+}

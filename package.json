@@ -13,6 +13,7 @@
     "precommit": "npm run lint"
   },
   "dependencies": {
+    "@nuxtjs/router": "^1.1.0",
     "cross-env": "^5.2.0",
     "express": "^4.16.3",
     "moment": "^2.23.0",
