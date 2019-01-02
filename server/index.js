@@ -1,6 +1,8 @@
 const consola = require('consola')
 const { Nuxt, Builder } = require('nuxt')
-const app = require('express')()
+const express = require('express')
+const router = express.Router()
+const app = express()
 const server = require('http').createServer(app)
 const io = require('socket.io')(server)
 const host = process.env.HOST || 'localhost'
@@ -26,6 +28,7 @@ async function start() {
 
   // Import API Routes
   app.use('/api', api)
+  app.use('/', router)
 
   // Give nuxt middleware to express
   app.use(nuxt.render)
@@ -38,31 +41,56 @@ async function start() {
   })
 
   // Socket.io
-  let connectionList = {}
 
+  // Chat room
+  // let connectionList = {}
+
+  // io.on('connection', function(socket) {
+  //   console.log('connect')
+  //   const socketId = socket.id
+  //   connectionList[socketId] = {
+  //     socket: socket
+  //   }
+  //   socket.on('join', function(data) {
+  //     data.userCount = Object.keys(connectionList).length
+  //     socket.broadcast.emit('broadcast_join', data)
+  //     connectionList[socketId].username = data.username
+  //   })
+  //   socket.on('disconnect', function() {
+  //     if (connectionList[socketId].username) {
+  //       socket.broadcast.emit('broadcast_quit', {
+  //         userCount: Object.keys(connectionList).length - 1,
+  //         username: connectionList[socketId].username
+  //       })
+  //     }
+  //     delete connectionList[socketId]
+  //   })
+
+  //   socket.on('chat_message', function(msg) {
+  //     socket.broadcast.emit('chat_message', msg)
+  //   })
+  // })
+
+  // Guessing number
+  let roomInfo = {}
   io.on('connection', function(socket) {
     console.log('connect')
-    const socketId = socket.id
-    connectionList[socketId] = {
-      socket: socket
-    }
-    socket.on('join', function(data) {
-      data.userCount = Object.keys(connectionList).length
-      socket.broadcast.emit('broadcast_join', data)
-      connectionList[socketId].username = data.username
-    })
-    socket.on('disconnect', function() {
-      if (connectionList[socketId].username) {
-        socket.broadcast.emit('broadcast_quit', {
-          userCount: Object.keys(connectionList).length - 1,
-          username: connectionList[socketId].username
-        })
+    let user = ''
+    socket.on('join', function(userName, roomId) {
+      user = userName
+      if (!roomInfo[roomId]) {
+        roomInfo[roomId] = []
       }
-      delete connectionList[socketId]
+      roomInfo[roomId].push(user)
+      socket.join(roomId)
+      socket.to(roomId).emit('sys', `${user} 加入了房間`, roomInfo[roomId])
+      console.log(`${user} 加入了 ${roomId}`)
+      console.log(JSON.stringify(roomInfo))
     })
-
-    socket.on('chat_message', function(msg) {
-      socket.broadcast.emit('chat_message', msg)
+    socket.on('leave', function(roomId) {
+      socket.leave(roomId)
+      socket.to(roomId).emit('sys', `${user} 退出了房間`, roomInfo[roomId])
+      console.log(`${user} 退出了 ${roomId}`)
     })
   })
 }

@@ -9,7 +9,7 @@ export function createRouter() {
       {
         path: '/',
         redirect: {
-          name: 'index'
+          name: 'multi_guess_AB'
         }
       },
       {

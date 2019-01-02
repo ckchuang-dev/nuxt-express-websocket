@@ -2,9 +2,13 @@
   <div id="pg_multi_guessing_number">
     <header>
       <div>
-        <h1>Room Multiplayer 1A2B Guessing Number</h1>
+        <h1>Multiplayer 1A2B Guessing Number</h1>
+        <h2>房間號碼：{{roomId}}</h2>
       </div>
       <div>
+        <nuxt-link :to="{name: 'multi_guess_AB'}">
+          <Button @click="leaveRoom">回到大廳</Button>
+        </nuxt-link>
         <Button
           v-if="!isGameStart && !hit"
           @click="startGame"
@@ -88,7 +92,8 @@
         startTime: new Date(),
         isGameStart: false,
         duration: 0,
-        interval: null
+        interval: null,
+        roomId: this.$route.params.roomId
       }
     },
     methods: {
@@ -157,7 +162,15 @@
         this.hit = false
         this.startTime = new Date()
         this.duration = 0
+      },
+      leaveRoom() {
+        this.$socket.emit('leave', this.roomId)
       }
+    },
+    mounted() {
+      this.$socket.on('sys', data => {
+        console.log(data)
+      })
     }
   }
 </script>
