@@ -39,7 +39,7 @@
       :key="user.socketId"
       v-for="user in userList"
     >
-      <h5>{{user.nickname}}</h5>
+      <div>{{user.nickname}}</div>
     </div>
   </div>
 </template>

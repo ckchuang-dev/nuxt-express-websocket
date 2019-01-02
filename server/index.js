@@ -99,6 +99,10 @@ async function start() {
       console.log(JSON.stringify(roomInfo))
     })
     socket.on('leave', function(roomId) {
+      const index = roomInfo[roomId].indexOf(user)
+      if (index !== -1) {
+        roomInfo[roomId].splice(index, 1)
+      }
       socket.leave(roomId)
       socket.to(roomId).emit('sys', `${user} 退出了房間`, roomInfo[roomId])
       console.log(`${user} 退出了 ${roomId}`)
