@@ -1,7 +1,27 @@
 <template>
   <div id="pg_multi_main_guessing_number">
-    <h1>遊戲大廳</h1>
-    <Button>創建新房間</Button>
+    <header>
+      <h1>遊戲大廳</h1>
+      <Button>創建新房間</Button>
+      <div v-if="nickname">
+        <span>Hi, {{nickname}}！</span>
+        <Button
+          v-if="!showEditNickname"
+          @click="editNickname"
+        >修改暱稱</Button>
+        <div v-if="showEditNickname">
+          <input
+            v-model="nickname"
+            type="text"
+          >
+          <Button @click="submitNickname">確定</Button>
+          <Button @click="cancelEditNickname">取消</Button>
+        </div>
+
+      </div>
+
+    </header>
+    <hr>
     <!-- <Button>加入房間</Button> -->
     <h3>房間列表</h3>
     <nuxt-link :to="{name: 'multi_guess_AB_room',params:{roomId: '1'}}">
@@ -23,11 +43,32 @@
       title: '1A2B Guessing Number'
     },
     data() {
-      return {}
+      return {
+        nickname: '',
+        showEditNickname: false
+      }
     },
     methods: {
       joinRoom(roomId) {
-        this.$socket.emit('join', 'user1', roomId)
+        this.$socket.emit('join', this.nickname, roomId)
+      },
+      editNickname() {
+        this.showEditNickname = true
+      },
+      submitNickname() {
+        localStorage.setItem('NICK_NAME', this.nickname)
+        this.showEditNickname = false
+      },
+      cancelEditNickname() {
+        this.showEditNickname = false
+      }
+    },
+    mounted() {
+      let localNickname = localStorage.getItem('NICK_NAME')
+      if (localNickname) {
+        this.nickname = localNickname
+      } else {
+        this.nickname = '訪客'
       }
     }
   }
