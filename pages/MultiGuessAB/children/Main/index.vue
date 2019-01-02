@@ -33,6 +33,14 @@
     <nuxt-link :to="{name: 'multi_guess_AB_room',params:{roomId: '3'}}">
       <Button @click="joinRoom('3')">Room 3</Button>
     </nuxt-link>
+    <hr>
+    <h3>在線玩家列表</h3>
+    <div
+      :key="user.socketId"
+      v-for="user in userList"
+    >
+      <h5>{{user.nickname}}</h5>
+    </div>
   </div>
 </template>
 
@@ -45,7 +53,8 @@
     data() {
       return {
         nickname: '',
-        showEditNickname: false
+        showEditNickname: false,
+        userList: []
       }
     },
     methods: {
@@ -57,6 +66,7 @@
       },
       submitNickname() {
         localStorage.setItem('NICK_NAME', this.nickname)
+        this.$socket.emit('edit_nickname', this.nickname)
         this.showEditNickname = false
       },
       cancelEditNickname() {
@@ -67,9 +77,13 @@
       let localNickname = localStorage.getItem('NICK_NAME')
       if (localNickname) {
         this.nickname = localNickname
+        this.$socket.emit('edit_nickname', this.nickname)
       } else {
         this.nickname = '訪客'
       }
+      this.$socket.on('user_list', data => {
+        this.userList = Object.values(data)
+      })
     }
   }
 </script>

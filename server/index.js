@@ -73,9 +73,20 @@ async function start() {
 
   // Guessing number
   let roomInfo = {}
+  let connectionList = {}
+
   io.on('connection', function(socket) {
     console.log('connect')
     let user = ''
+
+    const socketId = socket.id
+    const userData = {
+      socketId: socketId,
+      nickname: '訪客'
+    }
+    connectionList[socketId] = userData
+    io.emit('user_list', connectionList)
+
     socket.on('join', function(userName, roomId) {
       user = userName
       if (!roomInfo[roomId]) {
@@ -91,6 +102,14 @@ async function start() {
       socket.leave(roomId)
       socket.to(roomId).emit('sys', `${user} 退出了房間`, roomInfo[roomId])
       console.log(`${user} 退出了 ${roomId}`)
+    })
+    socket.on('edit_nickname', function(nickname) {
+      connectionList[socketId].nickname = nickname
+      io.emit('user_list', connectionList)
+    })
+    socket.on('disconnect', function() {
+      delete connectionList[socketId]
+      io.emit('user_list', connectionList)
     })
   })
 }
