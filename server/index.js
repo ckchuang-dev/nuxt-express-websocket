@@ -113,17 +113,20 @@ async function start() {
       const userList = await getUsers()
       if (userList) {
         for (let i = 0; i < userList.length; i++) {
-          if (
-            userList[i].account === user.account &&
-            userList[i].password === user.password
-          ) {
-            console.log(userList[i])
-            const user = {
-              ...userList[i],
-              isOnline: true,
-              socketId: socketId
+          if (userList[i].account === user.account) {
+            if (userList[i].password !== user.password) {
+              io.to(socketId).emit('login_fail', '密碼錯誤！')
+            } else if (userList[i].isOnline) {
+              io.to(socketId).emit('login_fail', '有其他使用者登入中！')
+            } else {
+              const user = {
+                ...userList[i],
+                isOnline: true,
+                socketId: socketId
+              }
+              await loginUser(user)
+              io.to(socketId).emit('login_success')
             }
-            await loginUser(user)
           }
         }
       }

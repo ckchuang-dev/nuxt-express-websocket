@@ -3,8 +3,8 @@
     {
       "id": "1",
       "nickname": "Alice",
-      "socketId": "SDIPiF5D5ejy3MkmAAAB",
-      "isOnline": true,
+      "socketId": "",
+      "isOnline": false,
       "account": "1",
       "password": "1"
     },

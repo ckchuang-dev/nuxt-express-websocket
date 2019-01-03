@@ -37,10 +37,18 @@
     methods: {
       submitLoginData() {
         this.$socket.emit('login', this.user)
-        console.log('登入啦！')
       }
     },
-    mounted() {}
+    mounted() {
+      this.$socket.on('login_success', () => {
+        this.$router.replace({
+          name: 'multi_guess_AB_main'
+        })
+      })
+      this.$socket.on('login_fail', msg => {
+        alert(msg)
+      })
+    }
   }
 </script>
 
