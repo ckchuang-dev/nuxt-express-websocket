@@ -85,7 +85,7 @@ async function start() {
     }
   }
 
-  const loginUser = async user => {
+  const updateUser = async user => {
     try {
       const ret = await axios.patch(
         `http://localhost:4000/users/${user.id}`,
@@ -99,7 +99,7 @@ async function start() {
 
   io.on('connection', function(socket) {
     console.log('connect')
-    let user = ''
+    let user = null
 
     const socketId = socket.id
     const userData = {
@@ -109,27 +109,38 @@ async function start() {
     connectionList[socketId] = userData
     io.emit('user_list', connectionList)
 
-    socket.on('login', async function(user) {
+    socket.on('login', async function(inputUser) {
       const userList = await getUsers()
       if (userList) {
         for (let i = 0; i < userList.length; i++) {
-          if (userList[i].account === user.account) {
-            if (userList[i].password !== user.password) {
+          if (userList[i].account === inputUser.account) {
+            if (userList[i].password !== inputUser.password) {
               io.to(socketId).emit('login_fail', '密碼錯誤！')
             } else if (userList[i].isOnline) {
               io.to(socketId).emit('login_fail', '有其他使用者登入中！')
             } else {
-              const user = {
+              user = {
                 ...userList[i],
                 isOnline: true,
                 socketId: socketId
               }
-              await loginUser(user)
+              await updateUser(user)
               io.to(socketId).emit('login_success')
             }
           }
         }
       }
+    })
+
+    // TODO: 使用者關閉視窗時，若是在房間內，需清空 server 端關於此使用者的房間資料
+    socket.on('disconnect', async function() {
+      if (user) {
+        user.isOnline = false
+        user.socketId = ''
+        await updateUser(user)
+      }
+      delete connectionList[socketId]
+      io.emit('user_list', connectionList)
     })
 
     // 遊戲大廳
@@ -146,11 +157,6 @@ async function start() {
     })
     socket.on('edit_nickname', function(nickname) {
       connectionList[socketId].nickname = nickname
-      io.emit('user_list', connectionList)
-    })
-    // TODO: 使用者關閉視窗時，若是在房間內，需清空 server 端關於此使用者的房間資料
-    socket.on('disconnect', function() {
-      delete connectionList[socketId]
       io.emit('user_list', connectionList)
     })
 
