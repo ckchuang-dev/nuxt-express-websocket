@@ -87,6 +87,7 @@ async function start() {
     connectionList[socketId] = userData
     io.emit('user_list', connectionList)
 
+    // 遊戲大廳
     socket.on('join', function(userName, roomId) {
       user = userName
       if (!roomInfo[roomId]) {
@@ -98,8 +99,22 @@ async function start() {
       console.log(`${user} 加入了 ${roomId}`)
       console.log(JSON.stringify(roomInfo))
     })
+    socket.on('edit_nickname', function(nickname) {
+      connectionList[socketId].nickname = nickname
+      io.emit('user_list', connectionList)
+    })
+    // TODO: 使用者關閉視窗時，若是在房間內，需清空 server 端關於此使用者的房間資料
+    socket.on('disconnect', function() {
+      delete connectionList[socketId]
+      io.emit('user_list', connectionList)
+    })
+
+    // 遊戲房內
     socket.on('leave', function(roomId) {
-      const index = roomInfo[roomId].indexOf(user)
+      let index = -1
+      if (roomInfo && roomInfo[roomId]) {
+        index = roomInfo[roomId].indexOf(user)
+      }
       if (index !== -1) {
         roomInfo[roomId].splice(index, 1)
       }
@@ -107,13 +122,11 @@ async function start() {
       socket.to(roomId).emit('sys', `${user} 退出了房間`, roomInfo[roomId])
       console.log(`${user} 退出了 ${roomId}`)
     })
-    socket.on('edit_nickname', function(nickname) {
-      connectionList[socketId].nickname = nickname
-      io.emit('user_list', connectionList)
-    })
-    socket.on('disconnect', function() {
-      delete connectionList[socketId]
-      io.emit('user_list', connectionList)
+    socket.on('send_target', function(roomId, target) {
+      socket
+        .to(roomId)
+        .emit('sys', `${user} 送出了他給對手的猜測值`, roomInfo[roomId])
+      console.log(`${user} 送出了他給對手的猜測值： ${target}`)
     })
   })
 }

@@ -1,16 +1,39 @@
 #pg_multi_guessing_number {
-}
-
-.log {
-  height: 100px;
-  overflow-y: scroll;
-}
-
-header {
-  text-align: center;
-  margin: 30px auto;
-  > div {
+  > header {
+    text-align: center;
+    margin: 30px auto;
+    > div {
+      margin: 20px auto;
+      > h2 {
+        font-size: 20px;
+        margin: 20px auto;
+      }
+    }
+  }
+  .log {
     margin: 20px auto;
+    > .msg_container {
+      border: 1px solid gray;
+      margin: 20px 100px;
+      height: 100px;
+      overflow-y: scroll;
+    }
+  }
+  .game_container {
+    margin: 20px auto;
+    .before_game {
+      margin: 0 100px;
+    }
+    .target_sent {
+      text-align: center;
+    }
+  }
+  .title {
+    margin: 20px auto;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+    color: black;
   }
 }
 

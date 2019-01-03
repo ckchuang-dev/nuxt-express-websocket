@@ -2,36 +2,37 @@
   <div id="pg_multi_main_guessing_number">
     <header>
       <h1>遊戲大廳</h1>
-      <Button>創建新房間</Button>
+      <button>創建新房間</button>
       <div v-if="nickname">
         <span>Hi, {{nickname}}！</span>
-        <Button
+        <button
           v-if="!showEditNickname"
           @click="editNickname"
-        >修改暱稱</Button>
+        >修改暱稱</button>
         <div v-if="showEditNickname">
           <input
             v-model="nickname"
             type="text"
+            @keyup.enter="submitNickname"
           >
-          <Button @click="submitNickname">確定</Button>
-          <Button @click="cancelEditNickname">取消</Button>
+          <button @click="submitNickname">確定</button>
+          <button @click="cancelEditNickname">取消</button>
         </div>
 
       </div>
 
     </header>
     <hr>
-    <!-- <Button>加入房間</Button> -->
+    <!-- <button>加入房間</button> -->
     <h3>房間列表</h3>
     <nuxt-link :to="{name: 'multi_guess_AB_room',params:{roomId: '1'}}">
-      <Button @click="joinRoom('1')">Room 1</Button>
+      <button @click="joinRoom('1')">Room 1</button>
     </nuxt-link>
     <nuxt-link :to="{name: 'multi_guess_AB_room',params:{roomId: '2'}}">
-      <Button @click="joinRoom('2')">Room 2</Button>
+      <button @click="joinRoom('2')">Room 2</button>
     </nuxt-link>
     <nuxt-link :to="{name: 'multi_guess_AB_room',params:{roomId: '3'}}">
-      <Button @click="joinRoom('3')">Room 3</Button>
+      <button @click="joinRoom('3')">Room 3</button>
     </nuxt-link>
     <hr>
     <h3>在線玩家列表</h3>
