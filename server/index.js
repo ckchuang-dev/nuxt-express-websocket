@@ -84,7 +84,7 @@ async function start() {
 
   const updateUser = async user => {
     try {
-      const ret = await axios.patch(
+      const ret = await axios.put(
         `http://localhost:4000/users/${user.id}`,
         user
       )
@@ -159,9 +159,11 @@ async function start() {
       }
     })
 
-    // TODO: 使用者關閉視窗時，若是在房間內，需清空 server 端關於此使用者的房間資料
     socket.on('disconnect', async function() {
       if (user) {
+        if (user.roomId) {
+          leaveRoom(user.roomId)
+        }
         user.isOnline = false
         user.socketId = ''
         await updateUser(user)
@@ -177,14 +179,12 @@ async function start() {
           io.to(socketId).emit('JOIN_ROOM_FAIL', '房間已滿！')
         } else {
           if (!rooms[index].player1) {
-            console.log('加入player1')
             let room = {
               ...rooms[index],
               player1: user
             }
             await updateRoom(room)
           } else if (!rooms[index].player2) {
-            console.log('加入player2')
             let room = {
               ...rooms[index],
               player2: user
@@ -192,6 +192,8 @@ async function start() {
             await updateRoom(room)
           }
           socket.join(roomId)
+          user.roomId = roomId
+          await updateUser(user)
           io.to(socketId).emit('JOIN_ROOM_SUCCESS', roomId)
           if (user && user.nickname) {
             socket
@@ -204,8 +206,7 @@ async function start() {
       }
     })
 
-    // 遊戲房內
-    socket.on('LEAVE_ROOM', async function(roomId) {
+    async function leaveRoom(roomId) {
       rooms = await getRooms()
       const index = roomId - 1
       if (rooms && rooms[index]) {
@@ -231,6 +232,9 @@ async function start() {
           await updateRoom(room)
         }
         socket.leave(roomId)
+        delete user.roomId
+        await updateUser(user)
+
         if (user && user.nickname) {
           socket
             .to(roomId)
@@ -239,6 +243,11 @@ async function start() {
         }
         rooms = await getRooms()
       }
+    }
+
+    // 遊戲房內
+    socket.on('LEAVE_ROOM', function(roomId) {
+      leaveRoom(roomId)
     })
     socket.on('send_target', function(roomId, target) {
       // socket
