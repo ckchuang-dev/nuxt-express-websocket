@@ -32,20 +32,24 @@
 
     <div class="game_container">
       <div class="title">遊戲內容</div>
-      <div
-        v-if="!isTargetSent"
-        class="before_game"
-      >
+      <div class="before_game">
         <div>請輸入一組四位數字給對方猜測（由 0 ~ 9 不重複數字組成）：</div>
         <input
           v-model="target"
           type="text"
+          :disabled="isTargetSent"
         >
-        <button @click="randomGenerate">隨機產生</button>
-        <button @click="submitTarget">送出</button>
+        <button
+          @click="randomGenerate"
+          :disabled="isTargetSent"
+        >隨機產生</button>
+        <button
+          @click="submitTarget"
+          :disabled="isTargetSent"
+        >送出</button>
       </div>
       <div
-        v-else
+        v-if="isTargetSent"
         class="target_sent"
       >
         <button>準備就緒</button>
