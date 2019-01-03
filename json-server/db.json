@@ -43,19 +43,19 @@
   ],
   "rooms": [
     {
-      "roomId": "1",
+      "id": "1",
       "player1": null,
       "player2": null,
       "gameStatus": ""
     },
     {
-      "roomId": "2",
+      "id": "2",
       "player1": null,
       "player2": null,
       "gameStatus": ""
     },
     {
-      "roomId": "3",
+      "id": "3",
       "player1": null,
       "player2": null,
       "gameStatus": ""

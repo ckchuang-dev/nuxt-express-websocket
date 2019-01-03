@@ -166,8 +166,6 @@ async function start() {
         user.socketId = ''
         await updateUser(user)
       }
-      // delete connectionList[socketId]
-      // io.emit('user_list', connectionList)
     })
 
     // 遊戲大廳
@@ -207,17 +205,40 @@ async function start() {
     })
 
     // 遊戲房內
-    socket.on('leave', function(roomId) {
-      // let index = -1
-      // if (rooms && rooms[roomId]) {
-      //   index = rooms[roomId].indexOf(user)
-      // }
-      // if (index !== -1) {
-      //   rooms[roomId].splice(index, 1)
-      // }
-      // socket.leave(roomId)
-      // socket.to(roomId).emit('sys', `${user} 退出了房間`, rooms[roomId])
-      // console.log(`${user} 退出了 ${roomId}`)
+    socket.on('LEAVE_ROOM', async function(roomId) {
+      rooms = await getRooms()
+      const index = roomId - 1
+      if (rooms && rooms[index]) {
+        if (
+          rooms[index].player1 &&
+          rooms[index].player1.socketId &&
+          rooms[index].player1.socketId === socketId
+        ) {
+          let room = {
+            ...rooms[index],
+            player1: null
+          }
+          await updateRoom(room)
+        } else if (
+          rooms[index].player2 &&
+          rooms[index].player2.socketId &&
+          rooms[index].player2.socketId === socketId
+        ) {
+          let room = {
+            ...rooms[index],
+            player2: null
+          }
+          await updateRoom(room)
+        }
+        socket.leave(roomId)
+        if (user && user.nickname) {
+          socket
+            .to(roomId)
+            .emit('sys', `${user.nickname} 退出了房間`, rooms[roomId])
+          console.log(`${user.nickname} 退出了 ${roomId}`)
+        }
+        rooms = await getRooms()
+      }
     })
     socket.on('send_target', function(roomId, target) {
       // socket

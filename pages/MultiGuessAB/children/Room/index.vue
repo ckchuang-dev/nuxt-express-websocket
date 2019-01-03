@@ -9,7 +9,7 @@
         <h2>房間號碼：{{roomId}}</h2>
       </div>
       <div>
-        <nuxt-link :to="{name: 'multi_guess_AB'}">
+        <nuxt-link :to="{name: 'multi_guess_AB_main'}">
           <button @click="leaveRoom">回到大廳</button>
         </nuxt-link>
       </div>
@@ -172,7 +172,7 @@
         this.$socket.emit('send_target', this.roomId, this.target)
       },
       leaveRoom() {
-        this.$socket.emit('leave', this.roomId)
+        this.$socket.emit('LEAVE_ROOM', this.roomId)
       }
     },
     mounted() {
