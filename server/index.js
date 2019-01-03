@@ -98,26 +98,19 @@ async function start() {
   }
 
   io.on('connection', function(socket) {
-    console.log('connect')
     let user = null
-
     const socketId = socket.id
-    const userData = {
-      socketId: socketId,
-      nickname: '訪客'
-    }
-    connectionList[socketId] = userData
-    io.emit('user_list', connectionList)
+    console.log(`${socketId} connected!`)
 
-    socket.on('login', async function(inputUser) {
+    socket.on('LOGIN_USER', async function(inputUser) {
       const userList = await getUsers()
       if (userList) {
         for (let i = 0; i < userList.length; i++) {
           if (userList[i].account === inputUser.account) {
             if (userList[i].password !== inputUser.password) {
-              io.to(socketId).emit('login_fail', '密碼錯誤！')
+              io.to(socketId).emit('LOGIN_FAIL', '密碼錯誤！')
             } else if (userList[i].isOnline) {
-              io.to(socketId).emit('login_fail', '有其他使用者登入中！')
+              io.to(socketId).emit('LOGIN_FAIL', '有其他使用者登入中！')
             } else {
               user = {
                 ...userList[i],
@@ -125,10 +118,21 @@ async function start() {
                 socketId: socketId
               }
               await updateUser(user)
-              io.to(socketId).emit('login_success')
+              io.to(socketId).emit('LOGIN_SUCCESS')
             }
           }
         }
+      }
+    })
+
+    socket.on('LOGIN_SUCCESS', function() {
+      io.to(socketId).emit('INIT_USER_DATA', user)
+    })
+    socket.on('LOGOUT_USER', function() {
+      if (user) {
+        user.isOnline = false
+        user.socketId = ''
+        updateUser(user)
       }
     })
 
@@ -139,8 +143,8 @@ async function start() {
         user.socketId = ''
         await updateUser(user)
       }
-      delete connectionList[socketId]
-      io.emit('user_list', connectionList)
+      // delete connectionList[socketId]
+      // io.emit('user_list', connectionList)
     })
 
     // 遊戲大廳
@@ -154,10 +158,6 @@ async function start() {
       socket.to(roomId).emit('sys', `${user} 加入了房間`, roomInfo[roomId])
       console.log(`${user} 加入了 ${roomId}`)
       console.log(JSON.stringify(roomInfo))
-    })
-    socket.on('edit_nickname', function(nickname) {
-      connectionList[socketId].nickname = nickname
-      io.emit('user_list', connectionList)
     })
 
     // 遊戲房內

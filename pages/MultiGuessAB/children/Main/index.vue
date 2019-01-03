@@ -2,28 +2,13 @@
   <div id="pg_multi_main_guessing_number">
     <header>
       <h1>遊戲大廳</h1>
-      <button>創建新房間</button>
-      <div v-if="nickname">
-        <span>Hi, {{nickname}}！</span>
-        <button
-          v-if="!showEditNickname"
-          @click="editNickname"
-        >修改暱稱</button>
-        <div v-if="showEditNickname">
-          <input
-            v-model="nickname"
-            type="text"
-            @keyup.enter="submitNickname"
-          >
-          <button @click="submitNickname">確定</button>
-          <button @click="cancelEditNickname">取消</button>
-        </div>
-
+      <button @click="logoutUser">登出</button>
+      <div v-if="user && user.nickname">
+        <span>Hi, {{user.nickname}}！</span>
       </div>
 
     </header>
     <hr>
-    <!-- <button>加入房間</button> -->
     <h3>房間列表</h3>
     <nuxt-link :to="{name: 'multi_guess_AB_room',params:{roomId: '1'}}">
       <button @click="joinRoom('1')">Room 1</button>
@@ -37,10 +22,10 @@
     <hr>
     <h3>在線玩家列表</h3>
     <div
-      :key="user.socketId"
-      v-for="user in userList"
+      :key="item.socketId"
+      v-for="item in userList"
     >
-      <div>{{user.nickname}}</div>
+      <div>{{item.nickname}}</div>
     </div>
   </div>
 </template>
@@ -53,37 +38,25 @@
     },
     data() {
       return {
-        nickname: '',
-        showEditNickname: false,
+        user: null,
         userList: []
       }
     },
     methods: {
       joinRoom(roomId) {
-        this.$socket.emit('join', this.nickname, roomId)
+        this.$socket.emit('join', roomId)
       },
-      editNickname() {
-        this.showEditNickname = true
-      },
-      submitNickname() {
-        localStorage.setItem('NICK_NAME', this.nickname)
-        this.$socket.emit('edit_nickname', this.nickname)
-        this.showEditNickname = false
-      },
-      cancelEditNickname() {
-        this.showEditNickname = false
+      logoutUser() {
+        this.$socket.emit('LOGOUT_USER')
+        this.$router.replace({
+          name: 'multi_guess_AB_login'
+        })
       }
     },
     mounted() {
-      let localNickname = localStorage.getItem('NICK_NAME')
-      if (localNickname) {
-        this.nickname = localNickname
-        this.$socket.emit('edit_nickname', this.nickname)
-      } else {
-        this.nickname = '訪客'
-      }
-      this.$socket.on('user_list', data => {
-        this.userList = Object.values(data)
+      this.$socket.emit('LOGIN_SUCCESS')
+      this.$socket.on('INIT_USER_DATA', data => {
+        this.user = data
       })
     }
   }

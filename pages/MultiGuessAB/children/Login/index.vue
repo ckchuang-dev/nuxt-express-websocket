@@ -36,16 +36,16 @@
     },
     methods: {
       submitLoginData() {
-        this.$socket.emit('login', this.user)
+        this.$socket.emit('LOGIN_USER', this.user)
       }
     },
     mounted() {
-      this.$socket.on('login_success', () => {
+      this.$socket.on('LOGIN_SUCCESS', () => {
         this.$router.replace({
           name: 'multi_guess_AB_main'
         })
       })
-      this.$socket.on('login_fail', msg => {
+      this.$socket.on('LOGIN_FAIL', msg => {
         alert(msg)
       })
     }
