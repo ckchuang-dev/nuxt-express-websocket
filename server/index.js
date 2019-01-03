@@ -126,7 +126,11 @@ async function start() {
     })
 
     socket.on('LOGIN_SUCCESS', function() {
-      io.to(socketId).emit('INIT_USER_DATA', user)
+      if (user) {
+        io.to(socketId).emit('INIT_USER_DATA', user)
+      } else {
+        io.to(socketId).emit('LOGIN_FAIL', '你尚未登入！')
+      }
     })
     socket.on('LOGOUT_USER', function() {
       if (user) {

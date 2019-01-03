@@ -1,5 +1,8 @@
 <template>
-  <div id="pg_multi_main_guessing_number">
+  <div
+    v-if="user"
+    id="pg_multi_main_guessing_number"
+  >
     <header>
       <h1>遊戲大廳</h1>
       <button @click="logoutUser">登出</button>
@@ -57,6 +60,12 @@
       this.$socket.emit('LOGIN_SUCCESS')
       this.$socket.on('INIT_USER_DATA', data => {
         this.user = data
+      })
+      this.$socket.on('LOGIN_FAIL', msg => {
+        alert(msg)
+        this.$router.replace({
+          name: 'multi_guess_AB_login'
+        })
       })
     }
   }
