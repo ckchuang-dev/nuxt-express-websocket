@@ -13,15 +13,9 @@
     </header>
     <hr>
     <h3>房間列表</h3>
-    <nuxt-link :to="{name: 'multi_guess_AB_room',params:{roomId: '1'}}">
-      <button @click="joinRoom('1')">Room 1</button>
-    </nuxt-link>
-    <nuxt-link :to="{name: 'multi_guess_AB_room',params:{roomId: '2'}}">
-      <button @click="joinRoom('2')">Room 2</button>
-    </nuxt-link>
-    <nuxt-link :to="{name: 'multi_guess_AB_room',params:{roomId: '3'}}">
-      <button @click="joinRoom('3')">Room 3</button>
-    </nuxt-link>
+    <button @click="joinRoom('1')">Room 1</button>
+    <button @click="joinRoom('2')">Room 2</button>
+    <button @click="joinRoom('3')">Room 3</button>
     <hr>
     <h3>在線玩家列表</h3>
     <div
@@ -47,7 +41,7 @@
     },
     methods: {
       joinRoom(roomId) {
-        this.$socket.emit('join', roomId)
+        this.$socket.emit('JOIN_ROOM', roomId)
       },
       logoutUser() {
         this.$socket.emit('LOGOUT_USER')
@@ -66,6 +60,17 @@
         this.$router.replace({
           name: 'multi_guess_AB_login'
         })
+      })
+      this.$socket.on('JOIN_ROOM_SUCCESS', roomId => {
+        this.$router.replace({
+          name: 'multi_guess_AB_room',
+          params: {
+            roomId: roomId
+          }
+        })
+      })
+      this.$socket.on('JOIN_ROOM_FAIL', msg => {
+        alert(msg)
       })
     }
   }

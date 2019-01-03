@@ -73,9 +73,6 @@ async function start() {
   // })
 
   // Guessing number
-  let roomInfo = {}
-  let connectionList = {}
-
   const getUsers = async () => {
     try {
       const ret = await axios.get('http://localhost:4000/users')
@@ -97,23 +94,45 @@ async function start() {
     }
   }
 
-  io.on('connection', function(socket) {
+  const getRooms = async () => {
+    try {
+      const ret = await axios.get('http://localhost:4000/rooms')
+      return ret && ret.data ? ret.data : null
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const updateRoom = async room => {
+    try {
+      const ret = await axios.patch(
+        `http://localhost:4000/rooms/${room.id}`,
+        room
+      )
+      return ret
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  io.on('connection', async function(socket) {
     let user = null
+    let rooms = await getRooms()
+    let users = await getUsers()
     const socketId = socket.id
     console.log(`${socketId} connected!`)
 
     socket.on('LOGIN_USER', async function(inputUser) {
-      const userList = await getUsers()
-      if (userList) {
-        for (let i = 0; i < userList.length; i++) {
-          if (userList[i].account === inputUser.account) {
-            if (userList[i].password !== inputUser.password) {
+      if (users) {
+        for (let i = 0; i < users.length; i++) {
+          if (users[i].account === inputUser.account) {
+            if (users[i].password !== inputUser.password) {
               io.to(socketId).emit('LOGIN_FAIL', '密碼錯誤！')
-            } else if (userList[i].isOnline) {
+            } else if (users[i].isOnline) {
               io.to(socketId).emit('LOGIN_FAIL', '有其他使用者登入中！')
             } else {
               user = {
-                ...userList[i],
+                ...users[i],
                 isOnline: true,
                 socketId: socketId
               }
@@ -152,36 +171,59 @@ async function start() {
     })
 
     // 遊戲大廳
-    socket.on('join', function(userName, roomId) {
-      user = userName
-      if (!roomInfo[roomId]) {
-        roomInfo[roomId] = []
+    socket.on('JOIN_ROOM', async function(roomId) {
+      rooms = await getRooms()
+      const index = roomId - 1
+      if (rooms && rooms[index]) {
+        if (rooms[index].player1 && rooms[index].player2) {
+          io.to(socketId).emit('JOIN_ROOM_FAIL', '房間已滿！')
+        } else {
+          if (!rooms[index].player1) {
+            console.log('加入player1')
+            let room = {
+              ...rooms[index],
+              player1: user
+            }
+            await updateRoom(room)
+          } else if (!rooms[index].player2) {
+            console.log('加入player2')
+            let room = {
+              ...rooms[index],
+              player2: user
+            }
+            await updateRoom(room)
+          }
+          socket.join(roomId)
+          io.to(socketId).emit('JOIN_ROOM_SUCCESS', roomId)
+          if (user && user.nickname) {
+            socket
+              .to(roomId)
+              .emit('sys', `${user.nickname} 加入了房間`, rooms[roomId])
+            console.log(`${user.nickname} 加入了 ${roomId}`)
+          }
+          rooms = await getRooms()
+        }
       }
-      roomInfo[roomId].push(user)
-      socket.join(roomId)
-      socket.to(roomId).emit('sys', `${user} 加入了房間`, roomInfo[roomId])
-      console.log(`${user} 加入了 ${roomId}`)
-      console.log(JSON.stringify(roomInfo))
     })
 
     // 遊戲房內
     socket.on('leave', function(roomId) {
-      let index = -1
-      if (roomInfo && roomInfo[roomId]) {
-        index = roomInfo[roomId].indexOf(user)
-      }
-      if (index !== -1) {
-        roomInfo[roomId].splice(index, 1)
-      }
-      socket.leave(roomId)
-      socket.to(roomId).emit('sys', `${user} 退出了房間`, roomInfo[roomId])
-      console.log(`${user} 退出了 ${roomId}`)
+      // let index = -1
+      // if (rooms && rooms[roomId]) {
+      //   index = rooms[roomId].indexOf(user)
+      // }
+      // if (index !== -1) {
+      //   rooms[roomId].splice(index, 1)
+      // }
+      // socket.leave(roomId)
+      // socket.to(roomId).emit('sys', `${user} 退出了房間`, rooms[roomId])
+      // console.log(`${user} 退出了 ${roomId}`)
     })
     socket.on('send_target', function(roomId, target) {
-      socket
-        .to(roomId)
-        .emit('sys', `${user} 送出了他給對手的猜測值`, roomInfo[roomId])
-      console.log(`${user} 送出了他給對手的猜測值： ${target}`)
+      // socket
+      //   .to(roomId)
+      //   .emit('sys', `${user} 送出了他給對手的猜測值`, rooms[roomId])
+      // console.log(`${user} 送出了他給對手的猜測值： ${target}`)
     })
   })
 }

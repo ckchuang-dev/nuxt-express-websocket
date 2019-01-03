@@ -46,21 +46,18 @@
       "roomId": "1",
       "player1": null,
       "player2": null,
-      "isFull": false,
       "gameStatus": ""
     },
     {
       "roomId": "2",
       "player1": null,
       "player2": null,
-      "isFull": false,
       "gameStatus": ""
     },
     {
       "roomId": "3",
       "player1": null,
       "player2": null,
-      "isFull": false,
       "gameStatus": ""
     }
   ]
