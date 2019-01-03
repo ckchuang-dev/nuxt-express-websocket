@@ -7,6 +7,7 @@ const server = require('http').createServer(app)
 const io = require('socket.io')(server)
 const host = process.env.HOST || 'localhost'
 const port = process.env.PORT || 3000
+const axios = require('axios')
 
 const api = require('./api')
 
@@ -75,6 +76,27 @@ async function start() {
   let roomInfo = {}
   let connectionList = {}
 
+  const getUsers = async () => {
+    try {
+      const ret = await axios.get('http://localhost:4000/users')
+      return ret && ret.data ? ret.data : null
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const loginUser = async user => {
+    try {
+      const ret = await axios.patch(
+        `http://localhost:4000/users/${user.id}`,
+        user
+      )
+      return ret
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   io.on('connection', function(socket) {
     console.log('connect')
     let user = ''
@@ -86,6 +108,26 @@ async function start() {
     }
     connectionList[socketId] = userData
     io.emit('user_list', connectionList)
+
+    socket.on('login', async function(user) {
+      const userList = await getUsers()
+      if (userList) {
+        for (let i = 0; i < userList.length; i++) {
+          if (
+            userList[i].account === user.account &&
+            userList[i].password === user.password
+          ) {
+            console.log(userList[i])
+            const user = {
+              ...userList[i],
+              isOnline: true,
+              socketId: socketId
+            }
+            await loginUser(user)
+          }
+        }
+      }
+    })
 
     // 遊戲大廳
     socket.on('join', function(userName, roomId) {

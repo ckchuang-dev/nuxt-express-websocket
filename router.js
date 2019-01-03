@@ -9,7 +9,7 @@ export function createRouter() {
       {
         path: '/',
         redirect: {
-          name: 'multi_guess_AB'
+          name: 'multi_guess_AB_login'
         }
       },
       {
@@ -33,8 +33,13 @@ export function createRouter() {
         children: [
           {
             path: '',
+            component: require('~/pages/MultiGuessAB/children/Login').default,
+            name: 'multi_guess_AB_login'
+          },
+          {
+            path: 'main',
             component: require('~/pages/MultiGuessAB/children/Main').default,
-            name: 'multi_guess_AB'
+            name: 'multi_guess_AB_main'
           },
           {
             path: ':roomId',
