@@ -36,12 +36,8 @@
     <div class="game_container">
       <div class="title">遊戲內容</div>
       <div class="before_game">
-        <div>請輸入一組四位數字給對方猜測（由 0 ~ 9 不重複數字組成）：</div>
-        <input
-          v-model="target"
-          type="text"
-          :disabled="isTargetSent"
-        >
+        <div>請隨機產生一組數字給對方猜測（由 0 ~ 9 不重複數字組成）：</div>
+        <div>{{target}}</div>
         <button
           @click="randomGenerate"
           :disabled="isTargetSent"
@@ -114,8 +110,10 @@
         return result
       },
       submitTarget() {
-        this.isTargetSent = true
-        this.$socket.emit('SEND_TARGET', this.target)
+        if (this.target) {
+          this.isTargetSent = true
+          this.$socket.emit('SEND_TARGET', this.target)
+        }
       },
       clickReady() {
         this.isReady = !this.isReady
