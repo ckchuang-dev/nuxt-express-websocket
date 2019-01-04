@@ -194,7 +194,7 @@ async function start() {
           if (user && user.nickname) {
             socket
               .to(roomId)
-              .emit('sys', `${user.nickname} 加入了房間`, rooms[roomId])
+              .emit('SYSTEM_LOG', `${user.nickname} 加入了房間`, rooms[roomId])
             console.log(`${user.nickname} 加入了 ${roomId}`)
           }
           rooms = await getRooms()
@@ -234,7 +234,7 @@ async function start() {
         if (user && user.nickname) {
           socket
             .to(roomId)
-            .emit('sys', `${user.nickname} 退出了房間`, rooms[roomId])
+            .emit('SYSTEM_LOG', `${user.nickname} 退出了房間`, rooms[roomId])
           console.log(`${user.nickname} 退出了 ${roomId}`)
         }
         rooms = await getRooms()
@@ -275,7 +275,7 @@ async function start() {
           await updateRoom(room)
         }
         io.in(user.roomId).emit(
-          'sys',
+          'SYSTEM_LOG',
           `${user.nickname} 送出了給對手的猜測值！`,
           rooms[user.roomId]
         )
@@ -313,13 +313,13 @@ async function start() {
         }
         if (ready) {
           io.in(user.roomId).emit(
-            'sys',
+            'SYSTEM_LOG',
             `${user.nickname} 已準備就緒！`,
             rooms[user.roomId]
           )
         } else {
           io.in(user.roomId).emit(
-            'sys',
+            'SYSTEM_LOG',
             `等...等等一下，${user.nickname} 已取消準備！`,
             rooms[user.roomId]
           )
@@ -336,6 +336,39 @@ async function start() {
             io.to(rooms[index].player1.socketId).emit('IS_ROOM_MANAGER', false)
           }
         }
+      }
+    })
+
+    // 對戰開始
+    socket.on('START_GAME', function() {
+      const index = user.roomId - 1
+      io.in(user.roomId).emit('SYSTEM_LOG', `對戰開始！`, rooms[user.roomId])
+      io.to(rooms[index].player1.socketId).emit(
+        'SEND_GUESSING_TARGET',
+        rooms[index].player2.target
+      )
+      io.to(rooms[index].player2.socketId).emit(
+        'SEND_GUESSING_TARGET',
+        rooms[index].player1.target
+      )
+    })
+    socket.on('SEND_GUESSING', async function(guessing, isPlayer1) {
+      const index = user.roomId - 1
+      rooms = await getRooms()
+      if (isPlayer1) {
+        io.in(user.roomId).emit(
+          'SYSTEM_LOG',
+          `${rooms[index].player1.nickname} 猜了 「${guessing}」`,
+          rooms[user.roomId]
+        )
+        io.to(rooms[index].player2.socketId).emit('CHANGE_TURN')
+      } else {
+        io.in(user.roomId).emit(
+          'SYSTEM_LOG',
+          `${rooms[index].player2.nickname} 猜了 「${guessing}」`,
+          rooms[user.roomId]
+        )
+        io.to(rooms[index].player1.socketId).emit('CHANGE_TURN')
       }
     })
   })

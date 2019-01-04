@@ -54,6 +54,7 @@
         <button
           v-if="isReady"
           @click="clickReady"
+          :disabled="isGameStart"
         >取消準備</button>
         <button
           v-else
@@ -63,7 +64,52 @@
       <button
         v-if="isRoomManager"
         @click="startGame"
+        :disabled="isGameStart"
       >開始遊戲</button>
+    </div>
+
+    <hr />
+
+    <div
+      v-if="isGameStart"
+      class="battle_container"
+    >
+      <div class="title">對戰內容</div>
+      <div class="battle_content">
+        <div class="guessing">
+          <div class="duration">
+            <span>經過時間：</span>
+            <span>{{` ${duration} 秒`}}</span>
+          </div>
+          <div class="user_input">
+            <span>輸入你的猜測：</span>
+            <input
+              type="text"
+              v-model="userInput"
+              @keyup.enter="submitGuessing"
+              :disabled="!isYourTurn"
+            >
+            <button
+              @click="submitGuessing"
+              :disabled="!isYourTurn"
+            >送出</button>
+          </div>
+          <div class="guessing_list">
+            <ul>
+              <li
+                v-for="(item, index) in guessingList"
+                :key="index"
+              >
+                <span>{{`第 ${item.timeStamp} 秒`}}</span>
+                <span>{{`／`}}</span>
+                <span>第 {{index + 1}} 次猜測：{{item.guess}}</span>
+                <span>{{`／`}}</span>
+                <span>第 {{index + 1}} 次結果：{{item.aCount}} A {{item.bCount}} B</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -77,21 +123,21 @@
     },
     data() {
       return {
+        // room data
         user: null,
         roomId: this.$route.params.roomId,
         systemLog: [],
         target: '',
-        guessingAnswer: '',
-        userInput: '',
-        guessingList: [],
-        hit: false,
-        startTime: new Date(),
-        isGameStart: false,
         isTargetSent: false,
         isReady: false,
         isRoomManager: false,
-        duration: 0,
-        interval: null
+        // battle data
+        isGameStart: false,
+        isYourTurn: false,
+        userInput: '',
+        guessingTarget: '',
+        guessingList: [],
+        duration: 0
       }
     },
     methods: {
@@ -120,14 +166,18 @@
         this.$socket.emit('SEND_READY_STATUS', this.isReady)
       },
       startGame() {
-        console.log('BATTLE!')
+        this.$socket.emit('START_GAME')
       },
       leaveRoom() {
         this.$socket.emit('LEAVE_ROOM', this.roomId)
+      },
+      submitGuessing() {
+        this.$socket.emit('SEND_GUESSING', this.userInput, this.isRoomManager)
+        this.isYourTurn = false
       }
     },
     mounted() {
-      this.$socket.on('sys', data => {
+      this.$socket.on('SYSTEM_LOG', data => {
         this.systemLog.push({
           time: moment(new Date().toJSON()).format('LTS'),
           text: data
@@ -145,6 +195,16 @@
       })
       this.$socket.on('IS_ROOM_MANAGER', status => {
         this.isRoomManager = status
+      })
+      this.$socket.on('SEND_GUESSING_TARGET', guessingTarget => {
+        if (this.isRoomManager) {
+          this.isYourTurn = true
+        }
+        this.isGameStart = true
+        this.guessingTarget = guessingTarget
+      })
+      this.$socket.on('CHANGE_TURN', () => {
+        this.isYourTurn = true
       })
     }
   }
