@@ -7,6 +7,7 @@ const server = require('http').createServer(app)
 const io = require('socket.io')(server)
 const host = process.env.HOST || 'localhost'
 const port = process.env.PORT || 3000
+const JSON_SERVER_URL = 'http://localhost:4000'
 const axios = require('axios')
 
 const api = require('./api')
@@ -75,7 +76,7 @@ async function start() {
   // Guessing number
   const getUsers = async () => {
     try {
-      const ret = await axios.get('http://localhost:4000/users')
+      const ret = await axios.get(`${JSON_SERVER_URL}/users`)
       return ret && ret.data ? ret.data : null
     } catch (error) {
       console.error(error)
@@ -84,10 +85,7 @@ async function start() {
 
   const updateUser = async user => {
     try {
-      const ret = await axios.put(
-        `http://localhost:4000/users/${user.id}`,
-        user
-      )
+      const ret = await axios.put(`${JSON_SERVER_URL}/users/${user.id}`, user)
       return ret
     } catch (error) {
       console.error(error)
@@ -96,7 +94,7 @@ async function start() {
 
   const getRooms = async () => {
     try {
-      const ret = await axios.get('http://localhost:4000/rooms')
+      const ret = await axios.get(`${JSON_SERVER_URL}/rooms`)
       return ret && ret.data ? ret.data : null
     } catch (error) {
       console.error(error)
@@ -105,10 +103,7 @@ async function start() {
 
   const updateRoom = async room => {
     try {
-      const ret = await axios.patch(
-        `http://localhost:4000/rooms/${room.id}`,
-        room
-      )
+      const ret = await axios.patch(`${JSON_SERVER_URL}/rooms/${room.id}`, room)
       return ret
     } catch (error) {
       console.error(error)
@@ -249,11 +244,86 @@ async function start() {
     socket.on('LEAVE_ROOM', function(roomId) {
       leaveRoom(roomId)
     })
-    socket.on('send_target', function(roomId, target) {
-      // socket
-      //   .to(roomId)
-      //   .emit('sys', `${user} 送出了他給對手的猜測值`, rooms[roomId])
-      // console.log(`${user} 送出了他給對手的猜測值： ${target}`)
+    socket.on('SEND_TARGET', async function(target) {
+      const index = user.roomId - 1
+      rooms = await getRooms()
+      if (user && user.roomId && user.nickname && rooms && rooms[index]) {
+        if (
+          rooms[index].player1 &&
+          socketId === rooms[index].player1.socketId
+        ) {
+          let room = {
+            ...rooms[index],
+            player1: {
+              ...rooms[index].player1,
+              target: target
+            }
+          }
+          await updateRoom(room)
+        } else if (
+          rooms[index].player2 &&
+          socketId === rooms[index].player2.socketId
+        ) {
+          let room = {
+            ...rooms[index],
+            player2: {
+              ...rooms[index].player2,
+              target: target
+            }
+          }
+          await updateRoom(room)
+        }
+        io.in(user.roomId).emit(
+          'sys',
+          `${user.nickname} 送出了給對手的猜測值！`,
+          rooms[user.roomId]
+        )
+        console.log(`${user.nickname} 送出了他給對手的猜測值： ${target}`)
+      }
+    })
+    socket.on('SEND_READY_STATUS', async function(ready) {
+      const index = user.roomId - 1
+      rooms = await getRooms()
+      if (user && user.roomId && user.nickname && rooms && rooms[index]) {
+        if (
+          rooms[index].player1 &&
+          socketId === rooms[index].player1.socketId
+        ) {
+          let room = {
+            ...rooms[index],
+            player1: {
+              ...rooms[index].player1,
+              ready: ready
+            }
+          }
+          await updateRoom(room)
+        } else if (
+          rooms[index].player2 &&
+          socketId === rooms[index].player2.socketId
+        ) {
+          let room = {
+            ...rooms[index],
+            player2: {
+              ...rooms[index].player2,
+              ready: ready
+            }
+          }
+          await updateRoom(room)
+        }
+        if (ready) {
+          io.in(user.roomId).emit(
+            'sys',
+            `${user.nickname} 已準備就緒！`,
+            rooms[user.roomId]
+          )
+        } else {
+          io.in(user.roomId).emit(
+            'sys',
+            `等...等等一下，${user.nickname} 已取消準備！`,
+            rooms[user.roomId]
+          )
+        }
+      }
     })
   })
 }
