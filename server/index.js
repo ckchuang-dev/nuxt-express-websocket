@@ -118,6 +118,7 @@ async function start() {
     console.log(`${socketId} connected!`)
 
     socket.on('LOGIN_USER', async function(inputUser) {
+      users = await getUsers()
       if (users) {
         for (let i = 0; i < users.length; i++) {
           if (users[i].account === inputUser.account) {
@@ -322,6 +323,18 @@ async function start() {
             `等...等等一下，${user.nickname} 已取消準備！`,
             rooms[user.roomId]
           )
+        }
+        rooms = await getRooms()
+        if (rooms && rooms[index] && rooms[index].player1) {
+          if (
+            rooms[index].player1.ready &&
+            rooms[index].player2 &&
+            rooms[index].player2.ready
+          ) {
+            io.to(rooms[index].player1.socketId).emit('IS_ROOM_MANAGER', true)
+          } else {
+            io.to(rooms[index].player1.socketId).emit('IS_ROOM_MANAGER', false)
+          }
         }
       }
     })

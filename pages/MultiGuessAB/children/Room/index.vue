@@ -63,8 +63,11 @@
           v-else
           @click="clickReady"
         >準備就緒</button>
-
       </div>
+      <button
+        v-if="isRoomManager"
+        @click="startGame"
+      >開始遊戲</button>
     </div>
   </div>
 </template>
@@ -90,6 +93,7 @@
         isGameStart: false,
         isTargetSent: false,
         isReady: false,
+        isRoomManager: false,
         duration: 0,
         interval: null
       }
@@ -117,6 +121,9 @@
         this.isReady = !this.isReady
         this.$socket.emit('SEND_READY_STATUS', this.isReady)
       },
+      startGame() {
+        console.log('BATTLE!')
+      },
       leaveRoom() {
         this.$socket.emit('LEAVE_ROOM', this.roomId)
       }
@@ -137,6 +144,9 @@
         this.$router.replace({
           name: 'multi_guess_AB_login'
         })
+      })
+      this.$socket.on('IS_ROOM_MANAGER', status => {
+        this.isRoomManager = status
       })
     }
   }
