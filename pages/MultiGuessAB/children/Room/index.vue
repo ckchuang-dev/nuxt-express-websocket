@@ -8,7 +8,7 @@
         <h1>Multiplayer 1A2B Guessing Number</h1>
         <h2>房間號碼：{{roomId}}</h2>
       </div>
-      <div>
+      <div v-if="!isGameStart || isGameOver">
         <nuxt-link :to="{name: 'multi_guess_AB_main'}">
           <button @click="leaveRoom">回到大廳</button>
         </nuxt-link>
@@ -71,16 +71,12 @@
     <hr />
 
     <div
-      v-if="isGameStart"
+      v-if="isGameStart && !isGameOver"
       class="battle_container"
     >
       <div class="title">對戰內容</div>
       <div class="battle_content">
         <div class="guessing">
-          <div class="duration">
-            <span>經過時間：</span>
-            <span>{{` ${duration} 秒`}}</span>
-          </div>
           <div class="user_input">
             <span>輸入你的猜測：</span>
             <input
@@ -94,22 +90,28 @@
               :disabled="!isYourTurn"
             >送出</button>
           </div>
-          <div class="guessing_list">
-            <ul>
-              <li
-                v-for="(item, index) in guessingList"
-                :key="index"
-              >
-                <span>{{`第 ${item.timeStamp} 秒`}}</span>
-                <span>{{`／`}}</span>
-                <span>第 {{index + 1}} 次猜測：{{item.guess}}</span>
-                <span>{{`／`}}</span>
-                <span>第 {{index + 1}} 次結果：{{item.aCount}} A {{item.bCount}} B</span>
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
+    </div>
+    <div
+      v-if="isGameOver"
+      class="hit"
+    >
+      <div v-if="isWinner">
+        <div class="congradulation">恭喜你猜對了！</div>
+        <img
+          src="~/assets/images/good.jpg"
+          alt=""
+        >
+      </div>
+      <div v-else>
+        <div class="congradulation">不哭不哭，眼淚是珍珠！</div>
+        <img
+          src="~/assets/images/loser.png"
+          alt=""
+        >
+      </div>
+
     </div>
   </div>
 </template>
@@ -136,8 +138,16 @@
         isYourTurn: false,
         userInput: '',
         guessingTarget: '',
-        guessingList: [],
-        duration: 0
+        isGameOver: false,
+        winner: ''
+      }
+    },
+    computed: {
+      isWinner() {
+        if (this.user && this.user.nickname) {
+          return this.winner === this.user.nickname
+        }
+        return false
       }
     },
     methods: {
@@ -206,6 +216,11 @@
       })
       this.$socket.on('CHANGE_TURN', () => {
         this.isYourTurn = true
+      })
+      this.$socket.on('GAME_OVER', winner => {
+        this.isYourTurn = false
+        this.isGameOver = true
+        this.winner = winner
       })
     }
   }

@@ -365,7 +365,8 @@ async function start() {
       }
       return {
         aCount: aCount,
-        bCount: bCount
+        bCount: bCount,
+        win: aCount === 4
       }
     }
 
@@ -374,24 +375,42 @@ async function start() {
       rooms = await getRooms()
       if (isPlayer1) {
         const result = calculateResult(rooms[index].player2.target, guessing)
-        io.in(user.roomId).emit(
-          'SYSTEM_LOG',
-          `${rooms[index].player1.nickname} 猜了 「${guessing}」，結果為「${
-            result.aCount
-          }A${result.bCount}B」。`,
-          rooms[user.roomId]
-        )
-        io.to(rooms[index].player2.socketId).emit('CHANGE_TURN')
+        if (result.win) {
+          io.in(user.roomId).emit(
+            'SYSTEM_LOG',
+            `恭喜 ${rooms[index].player1.nickname} 猜到了！`,
+            rooms[user.roomId]
+          )
+          io.in(user.roomId).emit('GAME_OVER', rooms[index].player1.nickname)
+        } else {
+          io.in(user.roomId).emit(
+            'SYSTEM_LOG',
+            `${rooms[index].player1.nickname} 猜了 「${guessing}」，結果為「${
+              result.aCount
+            }A${result.bCount}B」。`,
+            rooms[user.roomId]
+          )
+          io.to(rooms[index].player2.socketId).emit('CHANGE_TURN')
+        }
       } else {
         const result = calculateResult(rooms[index].player1.target, guessing)
-        io.in(user.roomId).emit(
-          'SYSTEM_LOG',
-          `${rooms[index].player2.nickname} 猜了 「${guessing}」，結果為「${
-            result.aCount
-          }A${result.bCount}B」。`,
-          rooms[user.roomId]
-        )
-        io.to(rooms[index].player1.socketId).emit('CHANGE_TURN')
+        if (result.win) {
+          io.in(user.roomId).emit(
+            'SYSTEM_LOG',
+            `恭喜 ${rooms[index].player2.nickname} 猜到了！`,
+            rooms[user.roomId]
+          )
+          io.in(user.roomId).emit('GAME_OVER', rooms[index].player2.nickname)
+        } else {
+          io.in(user.roomId).emit(
+            'SYSTEM_LOG',
+            `${rooms[index].player2.nickname} 猜了 「${guessing}」，結果為「${
+              result.aCount
+            }A${result.bCount}B」。`,
+            rooms[user.roomId]
+          )
+          io.to(rooms[index].player1.socketId).emit('CHANGE_TURN')
+        }
       }
     })
   })
