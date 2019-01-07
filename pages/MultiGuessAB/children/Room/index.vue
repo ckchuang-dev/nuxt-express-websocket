@@ -174,6 +174,7 @@
       submitGuessing() {
         this.$socket.emit('SEND_GUESSING', this.userInput, this.isRoomManager)
         this.isYourTurn = false
+        this.userInput = ''
       }
     },
     mounted() {

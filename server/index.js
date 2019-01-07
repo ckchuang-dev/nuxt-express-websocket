@@ -352,20 +352,43 @@ async function start() {
         rooms[index].player1.target
       )
     })
+
+    function calculateResult(answer, userInput) {
+      let aCount = 0
+      let bCount = 0
+      for (let i = 0; i < 4; i++) {
+        if (answer[i] === userInput[i]) {
+          aCount++
+        } else if (answer.indexOf(userInput[i]) > -1) {
+          bCount++
+        }
+      }
+      return {
+        aCount: aCount,
+        bCount: bCount
+      }
+    }
+
     socket.on('SEND_GUESSING', async function(guessing, isPlayer1) {
       const index = user.roomId - 1
       rooms = await getRooms()
       if (isPlayer1) {
+        const result = calculateResult(rooms[index].player2.target, guessing)
         io.in(user.roomId).emit(
           'SYSTEM_LOG',
-          `${rooms[index].player1.nickname} 猜了 「${guessing}」`,
+          `${rooms[index].player1.nickname} 猜了 「${guessing}」，結果為「${
+            result.aCount
+          }A${result.bCount}B」。`,
           rooms[user.roomId]
         )
         io.to(rooms[index].player2.socketId).emit('CHANGE_TURN')
       } else {
+        const result = calculateResult(rooms[index].player1.target, guessing)
         io.in(user.roomId).emit(
           'SYSTEM_LOG',
-          `${rooms[index].player2.nickname} 猜了 「${guessing}」`,
+          `${rooms[index].player2.nickname} 猜了 「${guessing}」，結果為「${
+            result.aCount
+          }A${result.bCount}B」。`,
           rooms[user.roomId]
         )
         io.to(rooms[index].player1.socketId).emit('CHANGE_TURN')
