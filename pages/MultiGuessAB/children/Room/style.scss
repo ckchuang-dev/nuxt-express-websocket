@@ -23,8 +23,16 @@
     margin: 20px auto;
     .before_game {
       margin: 0 100px;
+      text-align: center;
+      > .target {
+        margin: 10px auto;
+        font-size: 24px;
+        font-weight: 600;
+        color: red;
+      }
     }
     .target_sent {
+      margin: 0 100px;
       text-align: center;
     }
   }
@@ -46,7 +54,8 @@
     text-align: center;
     margin: 30px auto;
   }
-  .guessing_list {
+  .instuction {
+    text-align: center;
   }
 }
 

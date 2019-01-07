@@ -36,19 +36,19 @@
     <div class="game_container">
       <div class="title">遊戲內容</div>
       <div class="before_game">
-        <div>請隨機產生一組數字給對方猜測（由 0 ~ 9 不重複數字組成）：</div>
-        <div>{{target}}</div>
+        <div class="intro">請隨機產生一組數字給對方猜測（由 0 ~ 9 不重複數字組成）：</div>
+        <div class="target">{{target}}</div>
         <button
           @click="randomGenerate"
-          :disabled="isTargetSent"
+          v-if="!isTargetSent"
         >隨機產生</button>
         <button
           @click="submitTarget"
-          :disabled="isTargetSent"
+          v-if="!isTargetSent"
         >送出</button>
       </div>
       <div
-        v-if="isTargetSent"
+        v-if="isTargetSent && !isGameStart"
         class="target_sent"
       >
         <button
@@ -60,12 +60,12 @@
           v-else
           @click="clickReady"
         >準備就緒</button>
+        <button
+          v-if="isRoomManager"
+          @click="startGame"
+          :disabled="isGameStart"
+        >開始遊戲</button>
       </div>
-      <button
-        v-if="isRoomManager"
-        @click="startGame"
-        :disabled="isGameStart"
-      >開始遊戲</button>
     </div>
 
     <hr />
@@ -77,18 +77,20 @@
       <div class="title">對戰內容</div>
       <div class="battle_content">
         <div class="guessing">
-          <div class="user_input">
+          <div
+            class="user_input"
+            v-if="isYourTurn"
+          >
             <span>輸入你的猜測：</span>
             <input
               type="text"
               v-model="userInput"
               @keyup.enter="submitGuessing"
-              :disabled="!isYourTurn"
             >
-            <button
-              @click="submitGuessing"
-              :disabled="!isYourTurn"
-            >送出</button>
+            <button @click="submitGuessing">送出</button>
+          </div>
+          <div v-else>
+            <div class="instuction">現在輪到對手猜測囉！</div>
           </div>
         </div>
       </div>
