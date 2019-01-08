@@ -1,0 +1,102 @@
+#pg_multi_guessing_number {
+  > header {
+    text-align: center;
+    margin: 0 auto 30px auto;
+    > div {
+      margin: 0 auto 20px auto;
+      > h2 {
+        font-size: 20px;
+        margin: 20px auto;
+      }
+    }
+  }
+  .log {
+    margin: 20px auto;
+    > .msg_container {
+      border: 1px solid gray;
+      margin: 20px 100px 0 100px;
+      height: 100px;
+      overflow-y: scroll;
+      > #msg_end {
+        margin: 5px auto;
+      }
+    }
+    > #msg_input {
+      margin: 0 100px 20px 100px;
+      display: flex;
+      input {
+        height: 100%;
+        width: 100%;
+        flex: 9;
+      }
+      button {
+        margin-top: 0;
+        height: 100%;
+        flex: 1;
+      }
+    }
+  }
+  .game_container {
+    margin: 20px auto;
+    text-align: center;
+    .before_game {
+      margin: 0 100px;
+      > .target {
+        margin: 10px auto;
+        font-size: 24px;
+        font-weight: 600;
+        color: red;
+      }
+    }
+    .target_sent {
+      margin: 0 100px;
+    }
+  }
+  .title {
+    margin: 20px auto;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+  }
+}
+
+.guessing {
+  .duration {
+    text-align: center;
+    margin: 30px auto;
+  }
+  .user_input {
+    text-align: center;
+    text-align: center;
+    margin: 30px auto;
+  }
+  .instuction {
+    text-align: center;
+  }
+}
+
+.hit {
+  text-align: center;
+  .congradulation {
+    margin-top: 20px;
+    font-size: 50px;
+    font-weight: 700;
+  }
+  .result {
+    margin: 30px auto;
+    border: 3px solid gray;
+    width: 300px;
+    > div {
+      margin: 10px auto;
+    }
+  }
+}
+
+button {
+  font-size: 20px;
+  margin: 10px auto;
+}
+
+input {
+  font-size: 20px;
+}

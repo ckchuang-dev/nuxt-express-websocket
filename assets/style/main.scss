@@ -1,12 +1,17 @@
 html,
 body {
+  background-color: black;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+    url('../images/bg.jpeg');
+  background-size: cover;
+  color: lightgray;
   min-width: 320px;
   width: 100%;
   height: 100%;
   margin: 0;
   font-family: 'Quicksand', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
     'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  font-weight: 300;
+  font-weight: 500;
 }
 
 #__nuxt,

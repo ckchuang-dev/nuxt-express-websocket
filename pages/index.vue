@@ -10,6 +10,7 @@
         </li>
         <li>
           <nuxt-link :to="{name: 'SingleGuessAB'}">單人猜數字遊戲</nuxt-link>
+          <nuxt-link :to="{name: 'MultiGuessAB'}">雙人猜數字遊戲</nuxt-link>
         </li>
       </ul>
     </div>
