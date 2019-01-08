@@ -238,7 +238,6 @@
           text: data
         })
         if (this.$refs.msg_end) {
-          console.log(this.$refs.msg_end)
           this.$refs.msg_end.scrollIntoView()
         }
       })
