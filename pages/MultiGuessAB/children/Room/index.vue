@@ -280,6 +280,7 @@
         this.guessingTarget = ''
         this.isGameOver = false
         this.winner = ''
+        this.isRoomManager = false
       })
     }
   }
