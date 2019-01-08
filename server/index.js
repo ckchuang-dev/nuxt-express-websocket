@@ -195,7 +195,11 @@ async function start() {
           if (user && user.nickname) {
             socket
               .to(roomId)
-              .emit('SYSTEM_LOG', `${user.nickname} 加入了房間`, rooms[roomId])
+              .emit(
+                'SYSTEM_LOG',
+                `[系統] ${user.nickname} 加入了房間`,
+                rooms[roomId]
+              )
             // console.log(`${user.nickname} 加入了 ${roomId}`)
           }
           rooms = await getRooms()
@@ -234,7 +238,11 @@ async function start() {
         if (user && user.nickname) {
           socket
             .to(roomId)
-            .emit('SYSTEM_LOG', `${user.nickname} 退出了房間`, rooms[roomId])
+            .emit(
+              'SYSTEM_LOG',
+              `[系統] ${user.nickname} 退出了房間`,
+              rooms[roomId]
+            )
           // console.log(`${user.nickname} 退出了 ${roomId}`)
         }
         rooms = await getRooms()
@@ -276,7 +284,7 @@ async function start() {
         }
         io.in(user.roomId).emit(
           'SYSTEM_LOG',
-          `${user.nickname} 送出了給對手的猜測值！`,
+          `[系統] ${user.nickname} 送出了給對手的猜測值！`,
           rooms[user.roomId]
         )
         // console.log(`${user.nickname} 送出了他給對手的猜測值： ${target}`)
@@ -313,13 +321,13 @@ async function start() {
         if (ready) {
           io.in(user.roomId).emit(
             'SYSTEM_LOG',
-            `${user.nickname} 已準備就緒！`,
+            `[系統] ${user.nickname} 已準備就緒！`,
             rooms[user.roomId]
           )
         } else {
           io.in(user.roomId).emit(
             'SYSTEM_LOG',
-            `等...等等一下，${user.nickname} 已取消準備！`,
+            `[系統] 等...等等一下，${user.nickname} 已取消準備！`,
             rooms[user.roomId]
           )
         }
@@ -347,7 +355,11 @@ async function start() {
     // 對戰開始
     socket.on('START_GAME', async function() {
       rooms = await getRooms()
-      io.in(user.roomId).emit('SYSTEM_LOG', `對戰開始！`, rooms[user.roomId])
+      io.in(user.roomId).emit(
+        'SYSTEM_LOG',
+        `[系統] 對戰開始！`,
+        rooms[user.roomId]
+      )
       io.to(rooms[roomIndex].player1.socketId).emit(
         'SEND_GUESSING_TARGET',
         rooms[roomIndex].player2.target
@@ -404,7 +416,7 @@ async function start() {
         if (result.win) {
           io.in(user.roomId).emit(
             'SYSTEM_LOG',
-            `恭喜 ${rooms[roomIndex].player1.nickname} 猜到了！`,
+            `[系統] 恭喜 ${rooms[roomIndex].player1.nickname} 猜到了！`,
             rooms[user.roomId]
           )
           io.in(user.roomId).emit(
@@ -415,7 +427,7 @@ async function start() {
         } else {
           io.in(user.roomId).emit(
             'SYSTEM_LOG',
-            `${
+            `[系統] ${
               rooms[roomIndex].player1.nickname
             } 猜了 「${guessing}」，結果為「${result.aCount}A${
               result.bCount
@@ -432,7 +444,7 @@ async function start() {
         if (result.win) {
           io.in(user.roomId).emit(
             'SYSTEM_LOG',
-            `恭喜 ${rooms[roomIndex].player2.nickname} 猜到了！`,
+            `[系統] 恭喜 ${rooms[roomIndex].player2.nickname} 猜到了！`,
             rooms[user.roomId]
           )
           io.in(user.roomId).emit(
@@ -443,7 +455,7 @@ async function start() {
         } else {
           io.in(user.roomId).emit(
             'SYSTEM_LOG',
-            `${
+            `[系統] ${
               rooms[roomIndex].player2.nickname
             } 猜了 「${guessing}」，結果為「${result.aCount}A${
               result.bCount
@@ -458,7 +470,7 @@ async function start() {
     socket.on('STOP_GAME', function(nickname) {
       io.in(user.roomId).emit(
         'SYSTEM_LOG',
-        `${nickname} 已放棄此局對戰！`,
+        `[系統] ${nickname} 已放棄此局對戰！`,
         rooms[user.roomId]
       )
       io.in(user.roomId).emit('RESET_GAME')
@@ -469,7 +481,7 @@ async function start() {
       rooms = await getRooms()
       io.in(user.roomId).emit(
         'SYSTEM_LOG',
-        `${nickname} 想要再來一場對戰。`,
+        `[系統] ${nickname} 想要再來一場對戰。`,
         rooms[user.roomId]
       )
       if (user && user.roomId && user.nickname && rooms && rooms[roomIndex]) {
@@ -508,10 +520,18 @@ async function start() {
         resetGameData()
         io.in(user.roomId).emit(
           'SYSTEM_LOG',
-          `已準備好開始一場新對戰！`,
+          `[系統] 雙方已準備好開始一場新對戰！`,
           rooms[user.roomId]
         )
       }
+    })
+
+    socket.on('SEND_CHAT_MESSAGE', (msg, nickname) => {
+      io.in(user.roomId).emit(
+        'SYSTEM_LOG',
+        `[聊天] ${nickname}： ${msg}`,
+        rooms[user.roomId]
+      )
     })
   })
 }

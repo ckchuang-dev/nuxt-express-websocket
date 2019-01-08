@@ -1,9 +1,9 @@
 #pg_multi_guessing_number {
   > header {
     text-align: center;
-    margin: 30px auto;
+    margin: 0 auto 30px auto;
     > div {
-      margin: 20px auto;
+      margin: 0 auto 20px auto;
       > h2 {
         font-size: 20px;
         margin: 20px auto;
@@ -23,8 +23,16 @@
     }
     > #msg_input {
       margin: 0 100px 20px 100px;
+      display: flex;
       input {
+        height: 100%;
         width: 100%;
+        flex: 9;
+      }
+      button {
+        margin-top: 0;
+        height: 100%;
+        flex: 1;
       }
     }
   }

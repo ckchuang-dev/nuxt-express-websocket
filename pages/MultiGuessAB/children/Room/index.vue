@@ -36,8 +36,11 @@
       <div id="msg_input">
         <input
           type="text"
+          v-model="chatMessage"
           placeholder="輸入聊天訊息"
+          @keyup.enter="sendChatMessage"
         >
+        <button @click="sendChatMessage">送出</button>
       </div>
     </div>
 
@@ -98,11 +101,11 @@
             class="user_input"
             v-if="isYourTurn"
           >
-            <span>輸入你的猜測：</span>
             <input
               type="text"
               v-model="userInput"
               @keyup.enter="submitGuessing"
+              placeholder="輸入你的猜測"
             >
             <button @click="submitGuessing">送出</button>
           </div>
@@ -153,6 +156,7 @@
         isReady: false,
         isRestartSent: false,
         isRoomManager: false,
+        chatMessage: '',
         // battle data
         isGameStart: false,
         isYourTurn: false,
@@ -215,6 +219,16 @@
         this.$socket.emit('SEND_GUESSING', this.userInput, this.isRoomManager)
         this.isYourTurn = false
         this.userInput = ''
+      },
+      sendChatMessage() {
+        if (this.chatMessage) {
+          this.$socket.emit(
+            'SEND_CHAT_MESSAGE',
+            this.chatMessage,
+            this.user.nickname
+          )
+          this.chatMessage = ''
+        }
       }
     },
     mounted() {
