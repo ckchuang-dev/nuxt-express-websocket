@@ -116,7 +116,7 @@ async function start() {
     let roomIndex = -1
     let users = await getUsers()
     const socketId = socket.id
-    console.log(`${socketId} connected!`)
+    // console.log(`${socketId} connected!`)
 
     socket.on('LOGIN_USER', async function(inputUser) {
       users = await getUsers()
@@ -196,7 +196,7 @@ async function start() {
             socket
               .to(roomId)
               .emit('SYSTEM_LOG', `${user.nickname} 加入了房間`, rooms[roomId])
-            console.log(`${user.nickname} 加入了 ${roomId}`)
+            // console.log(`${user.nickname} 加入了 ${roomId}`)
           }
           rooms = await getRooms()
         }
@@ -235,7 +235,7 @@ async function start() {
           socket
             .to(roomId)
             .emit('SYSTEM_LOG', `${user.nickname} 退出了房間`, rooms[roomId])
-          console.log(`${user.nickname} 退出了 ${roomId}`)
+          // console.log(`${user.nickname} 退出了 ${roomId}`)
         }
         rooms = await getRooms()
         roomIndex = -1
@@ -279,7 +279,7 @@ async function start() {
           `${user.nickname} 送出了給對手的猜測值！`,
           rooms[user.roomId]
         )
-        console.log(`${user.nickname} 送出了他給對手的猜測值： ${target}`)
+        // console.log(`${user.nickname} 送出了他給對手的猜測值： ${target}`)
       }
     })
     socket.on('SEND_READY_STATUS', async function(ready) {
