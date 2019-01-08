@@ -16,14 +16,14 @@
     <button @click="joinRoom('1')">Room 1</button>
     <button @click="joinRoom('2')">Room 2</button>
     <button @click="joinRoom('3')">Room 3</button>
-    <hr>
+    <!-- <hr>
     <h3>在線玩家列表</h3>
     <div
       :key="item.socketId"
       v-for="item in userList"
     >
       <div>{{item.nickname}}</div>
-    </div>
+    </div> -->
   </div>
 </template>
 

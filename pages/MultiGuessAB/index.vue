@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="pg_multi_guessing_number">
     <nuxt-child />
   </div>
 
