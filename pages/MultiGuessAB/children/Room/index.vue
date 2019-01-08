@@ -65,9 +65,14 @@
         >開始遊戲</button>
       </div>
       <button
-        v-else-if="isTargetSent && isGameStart"
+        v-else-if="isTargetSent && isGameStart && !isGameOver"
         @click="stopGame"
       >放棄此局</button>
+      <button
+        v-else-if="isGameOver"
+        @click="restartGame"
+        :disabled="isRestartSent"
+      >再來一場</button>
     </div>
 
     <hr />
@@ -136,6 +141,7 @@
         target: '',
         isTargetSent: false,
         isReady: false,
+        isRestartSent: false,
         isRoomManager: false,
         // battle data
         isGameStart: false,
@@ -188,6 +194,10 @@
           this.$socket.emit('STOP_GAME', this.user.nickname)
         }
       },
+      restartGame() {
+        this.$socket.emit('RESTART_GAME', this.user.nickname)
+        this.isRestartSent = true
+      },
       leaveRoom() {
         this.$socket.emit('LEAVE_ROOM', this.roomId)
       },
@@ -236,6 +246,7 @@
         this.target = ''
         this.isTargetSent = false
         this.isReady = false
+        this.isRestartSent = false
         this.isGameStart = false
         this.isYourTurn = false
         this.userInput = ''

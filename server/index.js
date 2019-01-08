@@ -385,6 +385,10 @@ async function start() {
         delete room.player1.ready
         delete room.player2.target
         delete room.player2.ready
+        if (room.player1.restart && room.player2.restart) {
+          delete room.player1.restart
+          delete room.player2.restart
+        }
         await updateRoom(room)
         rooms = await getRooms()
       }
@@ -407,7 +411,7 @@ async function start() {
             'GAME_OVER',
             rooms[roomIndex].player1.nickname
           )
-          resetGameData()
+          // resetGameData()
         } else {
           io.in(user.roomId).emit(
             'SYSTEM_LOG',
@@ -435,7 +439,7 @@ async function start() {
             'GAME_OVER',
             rooms[roomIndex].player2.nickname
           )
-          resetGameData()
+          // resetGameData()
         } else {
           io.in(user.roomId).emit(
             'SYSTEM_LOG',
@@ -459,6 +463,55 @@ async function start() {
       )
       io.in(user.roomId).emit('RESET_GAME')
       resetGameData()
+    })
+
+    socket.on('RESTART_GAME', async function(nickname) {
+      rooms = await getRooms()
+      io.in(user.roomId).emit(
+        'SYSTEM_LOG',
+        `${nickname} 想要再來一場對戰。`,
+        rooms[user.roomId]
+      )
+      if (user && user.roomId && user.nickname && rooms && rooms[roomIndex]) {
+        if (
+          rooms[roomIndex].player1 &&
+          socketId === rooms[roomIndex].player1.socketId
+        ) {
+          let room = {
+            ...rooms[roomIndex],
+            player1: {
+              ...rooms[roomIndex].player1,
+              restart: true
+            }
+          }
+          await updateRoom(room)
+        } else if (
+          rooms[roomIndex].player2 &&
+          socketId === rooms[roomIndex].player2.socketId
+        ) {
+          let room = {
+            ...rooms[roomIndex],
+            player2: {
+              ...rooms[roomIndex].player2,
+              restart: true
+            }
+          }
+          await updateRoom(room)
+        }
+        rooms = await getRooms()
+      }
+      if (
+        rooms[roomIndex].player1.restart &&
+        rooms[roomIndex].player2.restart
+      ) {
+        io.in(user.roomId).emit('RESET_GAME')
+        resetGameData()
+        io.in(user.roomId).emit(
+          'SYSTEM_LOG',
+          `已準備好開始一場新對戰！`,
+          rooms[user.roomId]
+        )
+      }
     })
   })
 }
