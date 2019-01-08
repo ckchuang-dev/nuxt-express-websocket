@@ -5,10 +5,23 @@
   >
     <header>
       <div>
-        <h1>Multiplayer 1A2B Guessing Number</h1>
-        <h2>房間號碼：{{roomId}}</h2>
+        <div class="main_title">Multiplayer 1A2B Guessing Number</div>
+        <div class="title">房間號碼：{{roomId}}</div>
+        <div class="rules">
+          <div class="title">規則</div>
+          <ul>
+            <li>雙方分別給出一組四位數字給對方猜測（由 0 ~ 9 不重複數字組成）。</li>
+            <li>由第一位進入房間者為室長，為開始遊戲與先發的玩家。</li>
+            <li>對戰時，猜題後系統會給猜題者「XAXB」的提示。</li>
+            <li>例如題目為 1847，玩家猜 6149，則提示是1A1B，其中A表示有這個數字，且數字是在正確的位置， B表示有這個數字。</li>
+            <li>先猜到對方給的數組者獲勝！</li>
+          </ul>
+        </div>
       </div>
-      <div v-if="!isGameStart || isGameOver">
+      <div
+        class="back"
+        v-if="!isGameStart || isGameOver"
+      >
         <nuxt-link :to="{name: 'multi_guess_AB_main'}">
           <button @click="leaveRoom">回到大廳</button>
         </nuxt-link>

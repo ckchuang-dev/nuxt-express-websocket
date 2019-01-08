@@ -1,13 +1,23 @@
 #pg_multi_guessing_number {
   > header {
-    text-align: center;
     margin: 0 auto 30px auto;
+    > .rules {
+      text-align: left;
+    }
+    .main_title {
+      text-align: center;
+      font-size: 30px;
+      font-weight: 700;
+    }
     > div {
       margin: 0 auto 20px auto;
       > h2 {
         font-size: 20px;
         margin: 20px auto;
       }
+    }
+    > .back {
+      text-align: center;
     }
   }
   .log {
