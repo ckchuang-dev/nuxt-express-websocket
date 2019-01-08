@@ -54,7 +54,6 @@
         <button
           v-if="isReady"
           @click="clickReady"
-          :disabled="isGameStart"
         >取消準備</button>
         <button
           v-else
@@ -63,9 +62,12 @@
         <button
           v-if="isRoomManager"
           @click="startGame"
-          :disabled="isGameStart"
         >開始遊戲</button>
       </div>
+      <button
+        v-else-if="isTargetSent && isGameStart"
+        @click="stopGame"
+      >放棄此局</button>
     </div>
 
     <hr />
@@ -180,6 +182,12 @@
       startGame() {
         this.$socket.emit('START_GAME')
       },
+      stopGame() {
+        const res = confirm('現在放棄，比賽就結束了，你確定嗎？')
+        if (res) {
+          this.$socket.emit('STOP_GAME', this.user.nickname)
+        }
+      },
       leaveRoom() {
         this.$socket.emit('LEAVE_ROOM', this.roomId)
       },
@@ -223,6 +231,17 @@
         this.isYourTurn = false
         this.isGameOver = true
         this.winner = winner
+      })
+      this.$socket.on('RESET_GAME', () => {
+        this.target = ''
+        this.isTargetSent = false
+        this.isReady = false
+        this.isGameStart = false
+        this.isYourTurn = false
+        this.userInput = ''
+        this.guessingTarget = ''
+        this.isGameOver = false
+        this.winner = ''
       })
     }
   }

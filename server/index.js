@@ -113,6 +113,7 @@ async function start() {
   io.on('connection', async function(socket) {
     let user = null
     let rooms = await getRooms()
+    let roomIndex = -1
     let users = await getUsers()
     const socketId = socket.id
     console.log(`${socketId} connected!`)
@@ -169,20 +170,20 @@ async function start() {
     // 遊戲大廳
     socket.on('JOIN_ROOM', async function(roomId) {
       rooms = await getRooms()
-      const index = roomId - 1
-      if (rooms && rooms[index]) {
-        if (rooms[index].player1 && rooms[index].player2) {
+      roomIndex = roomId - 1
+      if (rooms && rooms[roomIndex]) {
+        if (rooms[roomIndex].player1 && rooms[roomIndex].player2) {
           io.to(socketId).emit('JOIN_ROOM_FAIL', '房間已滿！')
         } else {
-          if (!rooms[index].player1) {
+          if (!rooms[roomIndex].player1) {
             let room = {
-              ...rooms[index],
+              ...rooms[roomIndex],
               player1: user
             }
             await updateRoom(room)
-          } else if (!rooms[index].player2) {
+          } else if (!rooms[roomIndex].player2) {
             let room = {
-              ...rooms[index],
+              ...rooms[roomIndex],
               player2: user
             }
             await updateRoom(room)
@@ -204,25 +205,24 @@ async function start() {
 
     async function leaveRoom(roomId) {
       rooms = await getRooms()
-      const index = roomId - 1
-      if (rooms && rooms[index]) {
+      if (rooms && rooms[roomIndex]) {
         if (
-          rooms[index].player1 &&
-          rooms[index].player1.socketId &&
-          rooms[index].player1.socketId === socketId
+          rooms[roomIndex].player1 &&
+          rooms[roomIndex].player1.socketId &&
+          rooms[roomIndex].player1.socketId === socketId
         ) {
           let room = {
-            ...rooms[index],
+            ...rooms[roomIndex],
             player1: null
           }
           await updateRoom(room)
         } else if (
-          rooms[index].player2 &&
-          rooms[index].player2.socketId &&
-          rooms[index].player2.socketId === socketId
+          rooms[roomIndex].player2 &&
+          rooms[roomIndex].player2.socketId &&
+          rooms[roomIndex].player2.socketId === socketId
         ) {
           let room = {
-            ...rooms[index],
+            ...rooms[roomIndex],
             player2: null
           }
           await updateRoom(room)
@@ -238,6 +238,7 @@ async function start() {
           console.log(`${user.nickname} 退出了 ${roomId}`)
         }
         rooms = await getRooms()
+        roomIndex = -1
       }
     }
 
@@ -246,29 +247,28 @@ async function start() {
       leaveRoom(roomId)
     })
     socket.on('SEND_TARGET', async function(target) {
-      const index = user.roomId - 1
       rooms = await getRooms()
-      if (user && user.roomId && user.nickname && rooms && rooms[index]) {
+      if (user && user.roomId && user.nickname && rooms && rooms[roomIndex]) {
         if (
-          rooms[index].player1 &&
-          socketId === rooms[index].player1.socketId
+          rooms[roomIndex].player1 &&
+          socketId === rooms[roomIndex].player1.socketId
         ) {
           let room = {
-            ...rooms[index],
+            ...rooms[roomIndex],
             player1: {
-              ...rooms[index].player1,
+              ...rooms[roomIndex].player1,
               target: target
             }
           }
           await updateRoom(room)
         } else if (
-          rooms[index].player2 &&
-          socketId === rooms[index].player2.socketId
+          rooms[roomIndex].player2 &&
+          socketId === rooms[roomIndex].player2.socketId
         ) {
           let room = {
-            ...rooms[index],
+            ...rooms[roomIndex],
             player2: {
-              ...rooms[index].player2,
+              ...rooms[roomIndex].player2,
               target: target
             }
           }
@@ -283,29 +283,28 @@ async function start() {
       }
     })
     socket.on('SEND_READY_STATUS', async function(ready) {
-      const index = user.roomId - 1
       rooms = await getRooms()
-      if (user && user.roomId && user.nickname && rooms && rooms[index]) {
+      if (user && user.roomId && user.nickname && rooms && rooms[roomIndex]) {
         if (
-          rooms[index].player1 &&
-          socketId === rooms[index].player1.socketId
+          rooms[roomIndex].player1 &&
+          socketId === rooms[roomIndex].player1.socketId
         ) {
           let room = {
-            ...rooms[index],
+            ...rooms[roomIndex],
             player1: {
-              ...rooms[index].player1,
+              ...rooms[roomIndex].player1,
               ready: ready
             }
           }
           await updateRoom(room)
         } else if (
-          rooms[index].player2 &&
-          socketId === rooms[index].player2.socketId
+          rooms[roomIndex].player2 &&
+          socketId === rooms[roomIndex].player2.socketId
         ) {
           let room = {
-            ...rooms[index],
+            ...rooms[roomIndex],
             player2: {
-              ...rooms[index].player2,
+              ...rooms[roomIndex].player2,
               ready: ready
             }
           }
@@ -325,31 +324,37 @@ async function start() {
           )
         }
         rooms = await getRooms()
-        if (rooms && rooms[index] && rooms[index].player1) {
+        if (rooms && rooms[roomIndex] && rooms[roomIndex].player1) {
           if (
-            rooms[index].player1.ready &&
-            rooms[index].player2 &&
-            rooms[index].player2.ready
+            rooms[roomIndex].player1.ready &&
+            rooms[roomIndex].player2 &&
+            rooms[roomIndex].player2.ready
           ) {
-            io.to(rooms[index].player1.socketId).emit('IS_ROOM_MANAGER', true)
+            io.to(rooms[roomIndex].player1.socketId).emit(
+              'IS_ROOM_MANAGER',
+              true
+            )
           } else {
-            io.to(rooms[index].player1.socketId).emit('IS_ROOM_MANAGER', false)
+            io.to(rooms[roomIndex].player1.socketId).emit(
+              'IS_ROOM_MANAGER',
+              false
+            )
           }
         }
       }
     })
 
     // 對戰開始
-    socket.on('START_GAME', function() {
-      const index = user.roomId - 1
+    socket.on('START_GAME', async function() {
+      rooms = await getRooms()
       io.in(user.roomId).emit('SYSTEM_LOG', `對戰開始！`, rooms[user.roomId])
-      io.to(rooms[index].player1.socketId).emit(
+      io.to(rooms[roomIndex].player1.socketId).emit(
         'SEND_GUESSING_TARGET',
-        rooms[index].player2.target
+        rooms[roomIndex].player2.target
       )
-      io.to(rooms[index].player2.socketId).emit(
+      io.to(rooms[roomIndex].player2.socketId).emit(
         'SEND_GUESSING_TARGET',
-        rooms[index].player1.target
+        rooms[roomIndex].player1.target
       )
     })
 
@@ -370,48 +375,90 @@ async function start() {
       }
     }
 
+    async function resetGameData() {
+      rooms = await getRooms()
+      let room = {
+        ...rooms[roomIndex]
+      }
+      if (room.player1 && room.player1.target) {
+        delete room.player1.target
+        delete room.player1.ready
+        delete room.player2.target
+        delete room.player2.ready
+        await updateRoom(room)
+        rooms = await getRooms()
+      }
+    }
+
     socket.on('SEND_GUESSING', async function(guessing, isPlayer1) {
-      const index = user.roomId - 1
       rooms = await getRooms()
       if (isPlayer1) {
-        const result = calculateResult(rooms[index].player2.target, guessing)
+        const result = calculateResult(
+          rooms[roomIndex].player2.target,
+          guessing
+        )
         if (result.win) {
           io.in(user.roomId).emit(
             'SYSTEM_LOG',
-            `恭喜 ${rooms[index].player1.nickname} 猜到了！`,
+            `恭喜 ${rooms[roomIndex].player1.nickname} 猜到了！`,
             rooms[user.roomId]
           )
-          io.in(user.roomId).emit('GAME_OVER', rooms[index].player1.nickname)
+          io.in(user.roomId).emit(
+            'GAME_OVER',
+            rooms[roomIndex].player1.nickname
+          )
+          resetGameData()
         } else {
           io.in(user.roomId).emit(
             'SYSTEM_LOG',
-            `${rooms[index].player1.nickname} 猜了 「${guessing}」，結果為「${
-              result.aCount
-            }A${result.bCount}B」。`,
+            `${
+              rooms[roomIndex].player1.nickname
+            } 猜了 「${guessing}」，結果為「${result.aCount}A${
+              result.bCount
+            }B」。`,
             rooms[user.roomId]
           )
-          io.to(rooms[index].player2.socketId).emit('CHANGE_TURN')
+          io.to(rooms[roomIndex].player2.socketId).emit('CHANGE_TURN')
         }
       } else {
-        const result = calculateResult(rooms[index].player1.target, guessing)
+        const result = calculateResult(
+          rooms[roomIndex].player1.target,
+          guessing
+        )
         if (result.win) {
           io.in(user.roomId).emit(
             'SYSTEM_LOG',
-            `恭喜 ${rooms[index].player2.nickname} 猜到了！`,
+            `恭喜 ${rooms[roomIndex].player2.nickname} 猜到了！`,
             rooms[user.roomId]
           )
-          io.in(user.roomId).emit('GAME_OVER', rooms[index].player2.nickname)
+          io.in(user.roomId).emit(
+            'GAME_OVER',
+            rooms[roomIndex].player2.nickname
+          )
+          resetGameData()
         } else {
           io.in(user.roomId).emit(
             'SYSTEM_LOG',
-            `${rooms[index].player2.nickname} 猜了 「${guessing}」，結果為「${
-              result.aCount
-            }A${result.bCount}B」。`,
+            `${
+              rooms[roomIndex].player2.nickname
+            } 猜了 「${guessing}」，結果為「${result.aCount}A${
+              result.bCount
+            }B」。`,
             rooms[user.roomId]
           )
-          io.to(rooms[index].player1.socketId).emit('CHANGE_TURN')
+          io.to(rooms[roomIndex].player1.socketId).emit('CHANGE_TURN')
         }
       }
+    })
+
+    socket.on('STOP_GAME', function(nickname) {
+      io.in(user.roomId).emit(
+        'SYSTEM_LOG',
+        `${nickname} 已放棄此局對戰！`,
+        rooms[user.roomId]
+      )
+      io.in(user.roomId).emit('RESET_GAME')
+      resetGameData()
     })
   })
 }
