@@ -28,6 +28,16 @@
           <span>{{`${msg.time}: `}}</span>
           <span>{{msg.text}}</span>
         </div>
+        <div
+          id="msg_end"
+          ref="msg_end"
+        >&nbsp;</div>
+      </div>
+      <div id="msg_input">
+        <input
+          type="text"
+          placeholder="輸入聊天訊息"
+        >
       </div>
     </div>
 
@@ -213,6 +223,10 @@
           time: moment(new Date().toJSON()).format('LTS'),
           text: data
         })
+        if (this.$refs.msg_end) {
+          console.log(this.$refs.msg_end)
+          this.$refs.msg_end.scrollIntoView()
+        }
       })
       this.$socket.emit('LOGIN_SUCCESS')
       this.$socket.on('INIT_USER_DATA', data => {

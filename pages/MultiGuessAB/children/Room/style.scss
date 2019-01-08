@@ -14,9 +14,18 @@
     margin: 20px auto;
     > .msg_container {
       border: 1px solid gray;
-      margin: 20px 100px;
+      margin: 20px 100px 0 100px;
       height: 100px;
       overflow-y: scroll;
+      > #msg_end {
+        margin: 5px auto;
+      }
+    }
+    > #msg_input {
+      margin: 0 100px 20px 100px;
+      input {
+        width: 100%;
+      }
     }
   }
   .game_container {
