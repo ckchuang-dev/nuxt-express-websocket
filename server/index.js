@@ -526,7 +526,8 @@ async function start() {
       }
     })
 
-    socket.on('SEND_CHAT_MESSAGE', (msg, nickname) => {
+    socket.on('SEND_CHAT_MESSAGE', async (msg, nickname) => {
+      rooms = await getRooms()
       io.in(user.roomId).emit(
         'SYSTEM_LOG',
         `[聊天] ${nickname}： ${msg}`,
