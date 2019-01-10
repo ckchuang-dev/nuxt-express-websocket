@@ -28,6 +28,10 @@
     padding-top: 50px;
     padding-bottom: 150px;
     .before_game {
+      .rules {
+        width: 600px;
+        margin: 0 auto;
+      }
       > .target_input {
         margin: 0 auto;
         width: 400px;
@@ -61,7 +65,7 @@
       bottom: 0;
       width: 100%;
       > .msg_container {
-        border: 1px solid gray;
+        border: 1px solid #e7e7e7;
         height: 100px;
         overflow-y: scroll;
         > #msg_end {
@@ -107,14 +111,6 @@
     margin-top: 20px;
     font-size: 50px;
     font-weight: 700;
-  }
-  .result {
-    margin: 30px auto;
-    border: 3px solid gray;
-    width: 300px;
-    > div {
-      margin: 10px auto;
-    }
   }
 }
 
