@@ -37,7 +37,11 @@ async function start() {
 
   // Listen the server
   server.listen(port)
-  console.log(Buffer.from(Math.random() + '').toString('base64').substr(0, 5))
+  console.log(
+    Buffer.from(Math.random() + '')
+      .toString('base64')
+      .substr(0, 5)
+  )
   consola.ready({
     message: `Server listening on http://${host}:${port}`,
     badge: true
@@ -421,12 +425,8 @@ async function start() {
           // resetGameData()
         } else {
           io.in(user.roomId).emit(
-            'SYSTEM_LOG',
-            `[系統] ${
-              rooms[roomIndex].player1.nickname
-            } 猜了 「${guessing}」，結果為「${result.aCount}A${
-              result.bCount
-            }B」。`,
+            'GUESSING_LIST',
+            { guess: guessing, result: `${result.aCount}A${result.bCount}B` },
             rooms[user.roomId]
           )
           io.to(rooms[roomIndex].player2.socketId).emit('CHANGE_TURN')
@@ -449,12 +449,8 @@ async function start() {
           // resetGameData()
         } else {
           io.in(user.roomId).emit(
-            'SYSTEM_LOG',
-            `[系統] ${
-              rooms[roomIndex].player2.nickname
-            } 猜了 「${guessing}」，結果為「${result.aCount}A${
-              result.bCount
-            }B」。`,
+            'GUESSING_LIST',
+            { guess: guessing, result: `${result.aCount}A${result.bCount}B` },
             rooms[user.roomId]
           )
           io.to(rooms[roomIndex].player1.socketId).emit('CHANGE_TURN')

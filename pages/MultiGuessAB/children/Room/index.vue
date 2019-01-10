@@ -16,11 +16,24 @@
             <button @click="leaveRoom">回到大廳</button>
           </nuxt-link>
         </div>
+        <div
+          class="button"
+          v-if="isTargetSent && isGameStart && !isGameOver"
+        >
+          <button @click="stopGame">放棄此局</button>
+        </div>
       </div>
     </header>
 
     <div class="container">
-      <div class="before_game">
+      <div
+        v-if="!isGameStart"
+        class="before_game"
+      >
+        <!-- <div
+        v-if="false"
+        class="before_game"
+      > -->
         <div class="title">規則</div>
         <div class="rules">
           <ul>
@@ -75,11 +88,7 @@
         </div>
 
         <button
-          v-if="isTargetSent && isGameStart && !isGameOver"
-          @click="stopGame"
-        >放棄此局</button>
-        <button
-          v-else-if="isGameOver"
+          v-if="isGameOver"
           @click="restartGame"
           :disabled="isRestartSent"
         >再來一場</button>
@@ -88,23 +97,47 @@
         v-if="isGameStart && !isGameOver"
         class="battle_container"
       >
+        <!-- <div class="battle_container"> -->
         <div class="title">對戰內容</div>
-        <div class="battle_content">
-          <div class="guessing">
-            <div
-              class="user_input"
-              v-if="isYourTurn"
+        <div class="user_input">
+          <div v-if="isYourTurn">
+            <input
+              type="text"
+              v-model="userInput"
+              @keyup.enter="submitGuessing"
+              placeholder="輸入你的猜測"
             >
-              <input
-                type="text"
-                v-model="userInput"
-                @keyup.enter="submitGuessing"
-                placeholder="輸入你的猜測"
+            <button @click="submitGuessing">送出</button>
+          </div>
+          <div v-else>
+            <div>現在輪到對手猜測囉！</div>
+          </div>
+        </div>
+        <div class="guessing">
+          <div class="your_guessing">
+            <div class="title">你的猜測紀錄</div>
+            <div class="list">
+              <div
+                :key="index"
+                v-for="(item, index) in yourGuessings"
               >
-              <button @click="submitGuessing">送出</button>
+                {{`你猜了「${item.guess}」，結果為「${item.result}」`}}
+              </div>
             </div>
-            <div v-else>
-              <div class="instuction">現在輪到對手猜測囉！</div>
+          </div>
+          <div class="other_guessing">
+            <div class="title">你給對手的猜測數組</div>
+            <div class="target">
+              {{target}}
+            </div>
+            <div class="title">對手猜測紀錄</div>
+            <div class="list">
+              <div
+                :key="index"
+                v-for="(item, index) in otherGuessings"
+              >
+                {{`對手猜了「${item.guess}」，結果為「${item.result}」`}}
+              </div>
             </div>
           </div>
         </div>
@@ -185,7 +218,35 @@
         isYourTurn: false,
         userInput: '',
         isGameOver: false,
-        winner: ''
+        winner: '',
+        yourGuessings: [],
+        otherGuessings: [],
+        guessingList: [
+          {
+            guess: '1234',
+            result: '1A2B'
+          },
+          {
+            guess: '1234',
+            result: '1A2B'
+          },
+          {
+            guess: '1234',
+            result: '1A2B'
+          },
+          {
+            guess: '1234',
+            result: '1A2B'
+          },
+          {
+            guess: '1234',
+            result: '1A2B'
+          },
+          {
+            guess: '1234',
+            result: '1A2B'
+          }
+        ]
       }
     },
     computed: {
@@ -249,8 +310,6 @@
       },
       submitGuessing() {
         this.$socket.emit('SEND_GUESSING', this.userInput, this.isRoomManager)
-        this.isYourTurn = false
-        this.userInput = ''
       },
       sendChatMessage() {
         if (this.chatMessage) {
@@ -295,6 +354,15 @@
       this.$socket.on('CHANGE_TURN', () => {
         this.isYourTurn = true
       })
+      this.$socket.on('GUESSING_LIST', data => {
+        if (this.isYourTurn) {
+          this.yourGuessings.push(data)
+          this.isYourTurn = false
+          this.userInput = ''
+        } else {
+          this.otherGuessings.push(data)
+        }
+      })
       this.$socket.on('GAME_OVER', winner => {
         this.isYourTurn = false
         this.isGameOver = true
@@ -311,6 +379,8 @@
         this.isGameOver = false
         this.winner = ''
         this.isRoomManager = false
+        this.yourGuessings = []
+        this.otherGuessings = []
       })
     }
   }
