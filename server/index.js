@@ -419,10 +419,21 @@ async function start() {
             rooms[user.roomId]
           )
           io.in(user.roomId).emit(
-            'GAME_OVER',
-            rooms[roomIndex].player1.nickname
+            'GUESSING_LIST',
+            { guess: guessing, result: `${result.aCount}A${result.bCount}B` },
+            rooms[user.roomId]
           )
-          // resetGameData()
+          const winner = rooms[roomIndex].player1.nickname
+          io.to(rooms[roomIndex].player1.socketId).emit(
+            'GAME_OVER',
+            winner,
+            rooms[roomIndex].player2.target
+          )
+          io.to(rooms[roomIndex].player2.socketId).emit(
+            'GAME_OVER',
+            winner,
+            rooms[roomIndex].player1.target
+          )
         } else {
           io.in(user.roomId).emit(
             'GUESSING_LIST',
@@ -443,10 +454,21 @@ async function start() {
             rooms[user.roomId]
           )
           io.in(user.roomId).emit(
-            'GAME_OVER',
-            rooms[roomIndex].player2.nickname
+            'GUESSING_LIST',
+            { guess: guessing, result: `${result.aCount}A${result.bCount}B` },
+            rooms[user.roomId]
           )
-          // resetGameData()
+          const winner = rooms[roomIndex].player1.nickname
+          io.to(rooms[roomIndex].player1.socketId).emit(
+            'GAME_OVER',
+            winner,
+            rooms[roomIndex].player2.target
+          )
+          io.to(rooms[roomIndex].player2.socketId).emit(
+            'GAME_OVER',
+            winner,
+            rooms[roomIndex].player1.target
+          )
         } else {
           io.in(user.roomId).emit(
             'GUESSING_LIST',

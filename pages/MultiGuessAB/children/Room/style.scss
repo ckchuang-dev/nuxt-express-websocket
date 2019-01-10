@@ -1,6 +1,6 @@
 #pg_multi_guessing_number {
   > header {
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: black;
     position: fixed;
     width: 100%;
     height: 50px;
@@ -26,6 +26,7 @@
   }
   .container {
     padding-top: 50px;
+    padding-bottom: 150px;
     .before_game {
       > .target_input {
         margin: 0 auto;
@@ -42,29 +43,29 @@
       .user_input {
         text-align: center;
       }
-      .guessing {
-        margin: 20px auto;
-        display: flex;
-        .your_guessing {
-          flex: 1;
-        }
-        .other_guessing {
-          flex: 1;
-        }
-        .list {
-          width: 300px;
-          margin: 0 auto;
-        }
+    }
+    .guessing {
+      margin: 20px auto;
+      display: flex;
+      .your_guessing {
+        flex: 1;
+      }
+      .other_guessing {
+        flex: 1;
+      }
+      .list {
+        width: 300px;
+        margin: 0 auto;
       }
     }
     .system_log {
-      background-color: rgba(0, 0, 0, 0.7);
+      background-color: rgba(0, 0, 0, 1);
       position: fixed;
       bottom: 0;
       width: 100%;
       > .msg_container {
         border: 1px solid gray;
-        height: 200px;
+        height: 100px;
         overflow-y: scroll;
         > #msg_end {
           margin: 5px auto;
@@ -102,7 +103,7 @@
 
 .hit {
   text-align: center;
-  .congradulation {
+  .congratulation {
     margin-top: 20px;
     font-size: 50px;
     font-weight: 700;

@@ -22,6 +22,15 @@
         >
           <button @click="stopGame">放棄此局</button>
         </div>
+        <div
+          class="button"
+          v-if="isGameOver"
+        >
+          <button
+            @click="restartGame"
+            :disabled="isRestartSent"
+          >再來一場</button>
+        </div>
       </div>
     </header>
 
@@ -30,10 +39,6 @@
         v-if="!isGameStart"
         class="before_game"
       >
-        <!-- <div
-        v-if="false"
-        class="before_game"
-      > -->
         <div class="title">規則</div>
         <div class="rules">
           <ul>
@@ -86,35 +91,56 @@
             >開始遊戲</button>
           </div>
         </div>
-
-        <button
-          v-if="isGameOver"
-          @click="restartGame"
-          :disabled="isRestartSent"
-        >再來一場</button>
       </div>
-      <div
-        v-if="isGameStart && !isGameOver"
-        class="battle_container"
-      >
-        <!-- <div class="battle_container"> -->
-        <div class="title">對戰內容</div>
-        <div class="user_input">
-          <div v-if="isYourTurn">
-            <input
-              type="text"
-              v-model="userInput"
-              @keyup.enter="submitGuessing"
-              placeholder="輸入你的猜測"
+
+      <div v-else>
+        <div
+          v-if="isGameStart && !isGameOver"
+          class="battle_container"
+        >
+          <div class="title">對戰內容</div>
+          <div class="user_input">
+            <div v-if="isYourTurn">
+              <input
+                type="text"
+                v-model="userInput"
+                @keyup.enter="submitGuessing"
+                placeholder="輸入你的猜測"
+              >
+              <button @click="submitGuessing">送出</button>
+            </div>
+            <div v-else>
+              <div>現在輪到對手猜測囉！</div>
+            </div>
+          </div>
+        </div>
+        <div
+          v-else-if="isGameOver"
+          class="hit"
+        >
+          <div v-if="isWinner">
+            <div class="congratulation">恭喜你猜對了！</div>
+            <img
+              src="~/assets/images/good.jpg"
+              alt=""
             >
-            <button @click="submitGuessing">送出</button>
           </div>
           <div v-else>
-            <div>現在輪到對手猜測囉！</div>
+            <div class="congratulation">不哭不哭，眼淚是珍珠！</div>
+            <img
+              src="~/assets/images/loser.png"
+              alt=""
+            >
           </div>
         </div>
         <div class="guessing">
           <div class="your_guessing">
+            <div v-if="isGameOver">
+              <div class="title">對手給你的猜測數組</div>
+              <div class="target">
+                {{guessingTarget}}
+              </div>
+            </div>
             <div class="title">你的猜測紀錄</div>
             <div class="list">
               <div
@@ -141,26 +167,6 @@
             </div>
           </div>
         </div>
-      </div>
-      <div
-        v-if="isGameOver"
-        class="hit"
-      >
-        <div v-if="isWinner">
-          <div class="congradulation">恭喜你猜對了！</div>
-          <img
-            src="~/assets/images/good.jpg"
-            alt=""
-          >
-        </div>
-        <div v-else>
-          <div class="congradulation">不哭不哭，眼淚是珍珠！</div>
-          <img
-            src="~/assets/images/loser.png"
-            alt=""
-          >
-        </div>
-
       </div>
 
       <div class="system_log">
@@ -219,34 +225,9 @@
         userInput: '',
         isGameOver: false,
         winner: '',
+        guessingTarget: '',
         yourGuessings: [],
-        otherGuessings: [],
-        guessingList: [
-          {
-            guess: '1234',
-            result: '1A2B'
-          },
-          {
-            guess: '1234',
-            result: '1A2B'
-          },
-          {
-            guess: '1234',
-            result: '1A2B'
-          },
-          {
-            guess: '1234',
-            result: '1A2B'
-          },
-          {
-            guess: '1234',
-            result: '1A2B'
-          },
-          {
-            guess: '1234',
-            result: '1A2B'
-          }
-        ]
+        otherGuessings: []
       }
     },
     computed: {
@@ -363,7 +344,8 @@
           this.otherGuessings.push(data)
         }
       })
-      this.$socket.on('GAME_OVER', winner => {
+      this.$socket.on('GAME_OVER', (winner, guessingTarget) => {
+        this.guessingTarget = guessingTarget
         this.isYourTurn = false
         this.isGameOver = true
         this.winner = winner
@@ -381,6 +363,7 @@
         this.isRoomManager = false
         this.yourGuessings = []
         this.otherGuessings = []
+        this.guessingTarget = ''
       })
     }
   }
