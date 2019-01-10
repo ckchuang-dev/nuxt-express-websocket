@@ -16,6 +16,10 @@
     <button @click="joinRoom('1')">Room 1</button>
     <button @click="joinRoom('2')">Room 2</button>
     <button @click="joinRoom('3')">Room 3</button>
+    <button @click="joinRoom('4')">Room 4</button>
+    <button @click="joinRoom('5')">Room 5</button>
+    <button @click="joinRoom('6')">Room 6</button>
+    <button @click="joinRoom('7')">Room 7</button>
     <!-- <hr>
     <h3>在線玩家列表</h3>
     <div

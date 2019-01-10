@@ -37,6 +37,7 @@ async function start() {
 
   // Listen the server
   server.listen(port)
+  console.log(Buffer.from(Math.random() + '').toString('base64').substr(0, 5))
   consola.ready({
     message: `Server listening on http://${host}:${port}`,
     badge: true
@@ -360,14 +361,8 @@ async function start() {
         `[系統] 對戰開始！`,
         rooms[user.roomId]
       )
-      io.to(rooms[roomIndex].player1.socketId).emit(
-        'SEND_GUESSING_TARGET',
-        rooms[roomIndex].player2.target
-      )
-      io.to(rooms[roomIndex].player2.socketId).emit(
-        'SEND_GUESSING_TARGET',
-        rooms[roomIndex].player1.target
-      )
+      io.to(rooms[roomIndex].player1.socketId).emit('SEND_GUESSING_TARGET')
+      io.to(rooms[roomIndex].player2.socketId).emit('SEND_GUESSING_TARGET')
     })
 
     function calculateResult(answer, userInput) {

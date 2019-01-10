@@ -4,150 +4,159 @@
     id="pg_multi_guessing_number"
   >
     <header>
-      <div>
-        <div class="main_title">Multiplayer 1A2B Guessing Number</div>
-        <div class="title">房間號碼：{{roomId}}</div>
-        <div class="rules">
-          <div class="title">規則</div>
-          <ul>
-            <li>雙方分別給出一組四位數字給對方猜測（由 0 ~ 9 不重複數字組成）。</li>
-            <li>由第一位進入房間者為室長，為開始遊戲與先發的玩家。</li>
-            <li>對戰時，猜題後系統會給猜題者「XAXB」的提示。</li>
-            <li>例如題目為 1847，玩家猜 6149，則提示是1A1B，其中A表示有這個數字，且數字是在正確的位置， B表示有這個數字。</li>
-            <li>先猜到對方給的數組者獲勝！</li>
-          </ul>
+      <div class="header_container">
+        <!-- <div class="main_title">Multiplayer 1A2B Guessing Number</div> -->
+        <div class="roomId">房間號碼：{{roomId}}</div>
+        <div class="player">房內玩家：Alice、Bob</div>
+        <div
+          class="button"
+          v-if="!isGameStart || isGameOver"
+        >
+          <nuxt-link :to="{name: 'multi_guess_AB_main'}">
+            <button @click="leaveRoom">回到大廳</button>
+          </nuxt-link>
         </div>
-      </div>
-      <div
-        class="back"
-        v-if="!isGameStart || isGameOver"
-      >
-        <nuxt-link :to="{name: 'multi_guess_AB_main'}">
-          <button @click="leaveRoom">回到大廳</button>
-        </nuxt-link>
       </div>
     </header>
 
-    <hr />
-
-    <div class="log">
-      <div class="title">系統訊息</div>
-      <div class="msg_container">
-        <div
-          class="msg"
-          :key="`${msg.time}_${msg.text}`"
-          v-for="msg in systemLog"
-        >
-          <span>{{`${msg.time}: `}}</span>
-          <span>{{msg.text}}</span>
+    <div class="container">
+      <div class="before_game">
+        <div class="title">規則</div>
+        <div class="rules">
+          <ul>
+            <li>對戰前，雙方分別指定一組四位數（0~9 不重複數字組成）給對方猜測。</li>
+            <li>對戰時，輪流猜題，送出猜測後系統會給猜題者「XAXB」的提示。</li>
+            <li>A：有這個數字，且數字是在正確的位置。</li>
+            <li>B：有這個數字，但位置不對。</li>
+            <li>例如題目為 1234，玩家猜 1562，則提示是 1A1B。</li>
+            <li>先猜到對方給的數組者獲勝！</li>
+          </ul>
         </div>
         <div
-          id="msg_end"
-          ref="msg_end"
-        >&nbsp;</div>
-      </div>
-      <div id="msg_input">
-        <input
-          type="text"
-          v-model="chatMessage"
-          placeholder="輸入聊天訊息"
-          @keyup.enter="sendChatMessage"
+          v-if="!isTargetSent"
+          class="target_input"
         >
-        <button @click="sendChatMessage">送出</button>
-      </div>
-    </div>
+          <div class="title">請輸入給對手的猜測</div>
+          <input
+            v-model="target"
+            type="text"
+            placeholder="請輸入數字"
+          >
+          <button @click="randomGenerate">隨機產生</button>
+          <button @click="submitTarget">送出</button>
+          <div
+            class="error"
+            v-if="errorMsg"
+          >{{errorMsg}}</div>
+        </div>
+        <div
+          v-else
+          class="target_sent"
+        >
+          <div class="title">你給對手的猜測</div>
+          <div class="target">{{target}}</div>
+          <div
+            class="btn_group"
+            v-if="isTargetSent && !isGameStart"
+          >
+            <button
+              v-if="isReady"
+              @click="clickReady"
+            >取消準備</button>
+            <button
+              v-else
+              @click="clickReady"
+            >準備就緒</button>
+            <button
+              v-if="isRoomManager"
+              @click="startGame"
+            >開始遊戲</button>
+          </div>
+        </div>
 
-    <hr />
-
-    <div class="game_container">
-      <div class="title">遊戲內容</div>
-      <div class="before_game">
-        <div class="intro">請隨機產生一組數字給對方猜測（由 0 ~ 9 不重複數字組成）：</div>
-        <div class="target">{{target}}</div>
         <button
-          @click="randomGenerate"
-          v-if="!isTargetSent"
-        >隨機產生</button>
+          v-if="isTargetSent && isGameStart && !isGameOver"
+          @click="stopGame"
+        >放棄此局</button>
         <button
-          @click="submitTarget"
-          v-if="!isTargetSent"
-        >送出</button>
+          v-else-if="isGameOver"
+          @click="restartGame"
+          :disabled="isRestartSent"
+        >再來一場</button>
       </div>
       <div
-        v-if="isTargetSent && !isGameStart"
-        class="target_sent"
+        v-if="isGameStart && !isGameOver"
+        class="battle_container"
       >
-        <button
-          v-if="isReady"
-          @click="clickReady"
-        >取消準備</button>
-        <button
-          v-else
-          @click="clickReady"
-        >準備就緒</button>
-        <button
-          v-if="isRoomManager"
-          @click="startGame"
-        >開始遊戲</button>
-      </div>
-      <button
-        v-else-if="isTargetSent && isGameStart && !isGameOver"
-        @click="stopGame"
-      >放棄此局</button>
-      <button
-        v-else-if="isGameOver"
-        @click="restartGame"
-        :disabled="isRestartSent"
-      >再來一場</button>
-    </div>
-
-    <hr />
-
-    <div
-      v-if="isGameStart && !isGameOver"
-      class="battle_container"
-    >
-      <div class="title">對戰內容</div>
-      <div class="battle_content">
-        <div class="guessing">
-          <div
-            class="user_input"
-            v-if="isYourTurn"
-          >
-            <input
-              type="text"
-              v-model="userInput"
-              @keyup.enter="submitGuessing"
-              placeholder="輸入你的猜測"
+        <div class="title">對戰內容</div>
+        <div class="battle_content">
+          <div class="guessing">
+            <div
+              class="user_input"
+              v-if="isYourTurn"
             >
-            <button @click="submitGuessing">送出</button>
-          </div>
-          <div v-else>
-            <div class="instuction">現在輪到對手猜測囉！</div>
+              <input
+                type="text"
+                v-model="userInput"
+                @keyup.enter="submitGuessing"
+                placeholder="輸入你的猜測"
+              >
+              <button @click="submitGuessing">送出</button>
+            </div>
+            <div v-else>
+              <div class="instuction">現在輪到對手猜測囉！</div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div
-      v-if="isGameOver"
-      class="hit"
-    >
-      <div v-if="isWinner">
-        <div class="congradulation">恭喜你猜對了！</div>
-        <img
-          src="~/assets/images/good.jpg"
-          alt=""
-        >
-      </div>
-      <div v-else>
-        <div class="congradulation">不哭不哭，眼淚是珍珠！</div>
-        <img
-          src="~/assets/images/loser.png"
-          alt=""
-        >
+      <div
+        v-if="isGameOver"
+        class="hit"
+      >
+        <div v-if="isWinner">
+          <div class="congradulation">恭喜你猜對了！</div>
+          <img
+            src="~/assets/images/good.jpg"
+            alt=""
+          >
+        </div>
+        <div v-else>
+          <div class="congradulation">不哭不哭，眼淚是珍珠！</div>
+          <img
+            src="~/assets/images/loser.png"
+            alt=""
+          >
+        </div>
+
       </div>
 
+      <div class="system_log">
+        <div class="msg_container">
+          <div
+            class="msg"
+            :key="`${msg.time}_${msg.text}`"
+            v-for="msg in systemLog"
+          >
+            <span>{{`${msg.time}: `}}</span>
+            <span>{{msg.text}}</span>
+          </div>
+          <div
+            id="msg_end"
+            ref="msg_end"
+          >&nbsp;</div>
+        </div>
+        <div id="msg_input">
+          <input
+            type="text"
+            v-model="chatMessage"
+            placeholder="輸入聊天訊息"
+            @keyup.enter="sendChatMessage"
+          >
+          <button @click="sendChatMessage">送出</button>
+        </div>
+      </div>
     </div>
+
   </div>
 </template>
 
@@ -170,11 +179,11 @@
         isRestartSent: false,
         isRoomManager: false,
         chatMessage: '',
+        errorMsg: '',
         // battle data
         isGameStart: false,
         isYourTurn: false,
         userInput: '',
-        guessingTarget: '',
         isGameOver: false,
         winner: ''
       }
@@ -185,6 +194,9 @@
           return this.winner === this.user.nickname
         }
         return false
+      },
+      answerRegex() {
+        return new RegExp('^(?!.*(.).*\\1)\\d{4}$')
       }
     },
     methods: {
@@ -204,8 +216,15 @@
       },
       submitTarget() {
         if (this.target) {
-          this.isTargetSent = true
-          this.$socket.emit('SEND_TARGET', this.target)
+          if (this.answerRegex.test(this.target)) {
+            this.isTargetSent = true
+            this.$socket.emit('SEND_TARGET', this.target)
+            this.errorMsg = ''
+          } else {
+            this.errorMsg = '數組格式不正確'
+          }
+        } else {
+          this.errorMsg = '數組不能為空'
         }
       },
       clickReady() {
@@ -267,12 +286,11 @@
       this.$socket.on('IS_ROOM_MANAGER', status => {
         this.isRoomManager = status
       })
-      this.$socket.on('SEND_GUESSING_TARGET', guessingTarget => {
+      this.$socket.on('SEND_GUESSING_TARGET', () => {
         if (this.isRoomManager) {
           this.isYourTurn = true
         }
         this.isGameStart = true
-        this.guessingTarget = guessingTarget
       })
       this.$socket.on('CHANGE_TURN', () => {
         this.isYourTurn = true
@@ -290,7 +308,6 @@
         this.isGameStart = false
         this.isYourTurn = false
         this.userInput = ''
-        this.guessingTarget = ''
         this.isGameOver = false
         this.winner = ''
         this.isRoomManager = false
