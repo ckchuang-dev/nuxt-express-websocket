@@ -42,11 +42,75 @@
     },
     {
       "id": "6",
-      "nickname": "Frank",
+      "nickname": "Isaac",
       "socketId": "",
       "isOnline": false,
       "account": "6",
       "password": "6"
+    },
+    {
+      "id": "7",
+      "nickname": "Ivan",
+      "socketId": "",
+      "isOnline": false,
+      "account": "7",
+      "password": "7"
+    },
+    {
+      "id": "8",
+      "nickname": "Justin",
+      "socketId": "",
+      "isOnline": false,
+      "account": "8",
+      "password": "8"
+    },
+    {
+      "id": "9",
+      "nickname": "Mallory",
+      "socketId": "",
+      "isOnline": false,
+      "account": "9",
+      "password": "9"
+    },
+    {
+      "id": "10",
+      "nickname": "Marvin",
+      "socketId": "",
+      "isOnline": false,
+      "account": "10",
+      "password": "10"
+    },
+    {
+      "id": "11",
+      "nickname": "Matilda",
+      "socketId": "",
+      "isOnline": false,
+      "account": "11",
+      "password": "11"
+    },
+    {
+      "id": "12",
+      "nickname": "Oscar",
+      "socketId": "",
+      "isOnline": false,
+      "account": "12",
+      "password": "12"
+    },
+    {
+      "id": "13",
+      "nickname": "Steve",
+      "socketId": "",
+      "isOnline": false,
+      "account": "13",
+      "password": "13"
+    },
+    {
+      "id": "14",
+      "nickname": "Zoe",
+      "socketId": "",
+      "isOnline": false,
+      "account": "14",
+      "password": "14"
     }
   ],
   "rooms": [
@@ -64,6 +128,30 @@
     },
     {
       "id": "3",
+      "player1": null,
+      "player2": null,
+      "gameStatus": ""
+    },
+    {
+      "id": "4",
+      "player1": null,
+      "player2": null,
+      "gameStatus": ""
+    },
+    {
+      "id": "5",
+      "player1": null,
+      "player2": null,
+      "gameStatus": ""
+    },
+    {
+      "id": "6",
+      "player1": null,
+      "player2": null,
+      "gameStatus": ""
+    },
+    {
+      "id": "7",
       "player1": null,
       "player2": null,
       "gameStatus": ""
