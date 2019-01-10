@@ -30,7 +30,7 @@
       "disableLanguages": ["html"]
     }
   },
-  "eslint.validate": ["javascript", "html", "vue"],
+  // "eslint.validate": ["javascript", "html", "vue"],
   "blueprint.templatesPath": [".vscode/blueprint-templates"],
   "cSpell.words": ["nuxt", "nuxtjs", "vuex"],
   "cSpell.ignorePaths": [
