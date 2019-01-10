@@ -37,11 +37,6 @@ async function start() {
 
   // Listen the server
   server.listen(port)
-  console.log(
-    Buffer.from(Math.random() + '')
-      .toString('base64')
-      .substr(0, 5)
-  )
   consola.ready({
     message: `Server listening on http://${host}:${port}`,
     badge: true
