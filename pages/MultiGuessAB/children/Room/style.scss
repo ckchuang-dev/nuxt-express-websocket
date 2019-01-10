@@ -31,9 +31,6 @@
       > .target_input {
         margin: 0 auto;
         width: 400px;
-        .error {
-          color: red;
-        }
       }
       > .target_sent {
         text-align: center;
@@ -98,6 +95,9 @@
     font-size: 24px;
     font-weight: 700;
     margin: 10px auto;
+  }
+  .error {
+    color: red;
   }
 }
 

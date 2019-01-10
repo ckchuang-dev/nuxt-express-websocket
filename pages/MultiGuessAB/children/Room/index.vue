@@ -10,6 +10,15 @@
         <div class="player">房內玩家：Alice、Bob</div>
         <div
           class="button"
+          v-if="isGameOver"
+        >
+          <button
+            @click="restartGame"
+            :disabled="isRestartSent"
+          >再來一場</button>
+        </div>
+        <div
+          class="button"
           v-if="!isGameStart || isGameOver"
         >
           <nuxt-link :to="{name: 'multi_guess_AB_main'}">
@@ -21,15 +30,6 @@
           v-if="isTargetSent && isGameStart && !isGameOver"
         >
           <button @click="stopGame">放棄此局</button>
-        </div>
-        <div
-          class="button"
-          v-if="isGameOver"
-        >
-          <button
-            @click="restartGame"
-            :disabled="isRestartSent"
-          >再來一場</button>
         </div>
       </div>
     </header>
@@ -108,6 +108,10 @@
                 placeholder="輸入你的猜測"
               >
               <button @click="submitGuessing">送出</button>
+              <div
+                class="error"
+                v-if="errorMsg"
+              >{{errorMsg}}</div>
             </div>
             <div v-else>
               <div>現在輪到對手猜測囉！</div>
@@ -290,7 +294,16 @@
         this.$socket.emit('LEAVE_ROOM', this.roomId)
       },
       submitGuessing() {
-        this.$socket.emit('SEND_GUESSING', this.userInput, this.isRoomManager)
+        if (this.userInput) {
+          if (this.answerRegex.test(this.userInput)) {
+            this.$socket.emit('SEND_GUESSING', this.userInput, this.isRoomManager)
+            this.errorMsg = ''
+          } else {
+            this.errorMsg = '猜測格式不正確'
+          }
+        } else {
+          this.errorMsg = '猜測不能為空'
+        }
       },
       sendChatMessage() {
         if (this.chatMessage) {
