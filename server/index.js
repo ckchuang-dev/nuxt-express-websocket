@@ -148,9 +148,11 @@ async function start() {
       }
     })
 
-    socket.on('LOGIN_SUCCESS', function() {
+    socket.on('LOGIN_SUCCESS', async function() {
       if (user) {
         io.to(socketId).emit('INIT_USER_DATA', user)
+        rooms = await getRooms()
+        io.to(socketId).emit('UPDATE_ROOM_DATA', rooms)
       } else {
         io.to(socketId).emit('LOGIN_FAIL', '你尚未登入！')
       }
@@ -211,6 +213,7 @@ async function start() {
             )
           }
           rooms = await getRooms()
+          io.emit('UPDATE_ROOM_DATA', rooms)
         }
       }
     })
@@ -275,6 +278,7 @@ async function start() {
           // console.log(`${user.nickname} 退出了 ${roomId}`)
         }
         rooms = await getRooms()
+        io.emit('UPDATE_ROOM_DATA', rooms)
         roomIndex = -1
       }
     }
