@@ -215,7 +215,7 @@ async function start() {
       }
     })
 
-    socket.on('CLIENT_JOIN_ROOM_SUCCESS', async () => {
+    async function updatePlayerList() {
       rooms = await getRooms()
       const players = []
       if (rooms && rooms[roomIndex] && rooms[roomIndex].player1) {
@@ -225,6 +225,10 @@ async function start() {
         players.push(rooms[roomIndex].player2.nickname)
       }
       io.in(user.roomId).emit('PLAYER_LIST', players, rooms[user.roomId])
+    }
+
+    socket.on('CLIENT_JOIN_ROOM_SUCCESS', async () => {
+      updatePlayerList()
     })
 
     async function leaveRoom(roomId) {
@@ -255,6 +259,7 @@ async function start() {
           io.in(user.roomId).emit('RESET_GAME')
           resetGameData()
         }
+        await updatePlayerList()
         socket.leave(roomId)
         delete user.roomId
         await updateUser(user)
