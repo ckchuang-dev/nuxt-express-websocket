@@ -240,6 +240,8 @@ async function start() {
             player1: null
           }
           await updateRoom(room)
+          io.in(user.roomId).emit('RESET_GAME')
+          resetGameData()
         } else if (
           rooms[roomIndex].player2 &&
           rooms[roomIndex].player2.socketId &&
@@ -250,6 +252,8 @@ async function start() {
             player2: null
           }
           await updateRoom(room)
+          io.in(user.roomId).emit('RESET_GAME')
+          resetGameData()
         }
         socket.leave(roomId)
         delete user.roomId
@@ -406,18 +410,18 @@ async function start() {
       let room = {
         ...rooms[roomIndex]
       }
-      if (room.player1 && room.player1.target) {
+      if (room && room.player1) {
         delete room.player1.target
         delete room.player1.ready
+        delete room.player1.restart
+      }
+      if (room && room.player2) {
         delete room.player2.target
         delete room.player2.ready
-        if (room.player1.restart && room.player2.restart) {
-          delete room.player1.restart
-          delete room.player2.restart
-        }
-        await updateRoom(room)
-        rooms = await getRooms()
+        delete room.player2.restart
       }
+      await updateRoom(room)
+      rooms = await getRooms()
     }
 
     socket.on('SEND_GUESSING', async function(guessing, isPlayer1) {
