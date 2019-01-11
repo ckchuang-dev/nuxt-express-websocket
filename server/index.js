@@ -193,18 +193,27 @@ async function start() {
           await updateUser(user)
           io.to(socketId).emit('JOIN_ROOM_SUCCESS', roomId)
           if (user && user.nickname) {
-            socket
-              .to(roomId)
-              .emit(
-                'SYSTEM_LOG',
-                `[系統] ${user.nickname} 加入了房間`,
-                rooms[roomId]
-              )
-            // console.log(`${user.nickname} 加入了 ${roomId}`)
+            io.in(user.roomId).emit(
+              'SYSTEM_LOG',
+              `[系統] ${user.nickname} 加入了房間`,
+              rooms[user.roomId]
+            )
           }
           rooms = await getRooms()
         }
       }
+    })
+
+    socket.on('CLIENT_JOIN_ROOM_SUCCESS', async () => {
+      rooms = await getRooms()
+      const players = []
+      if (rooms && rooms[roomIndex] && rooms[roomIndex].player1) {
+        players.push(rooms[roomIndex].player1.nickname)
+      }
+      if (rooms && rooms[roomIndex] && rooms[roomIndex].player2) {
+        players.push(rooms[roomIndex].player2.nickname)
+      }
+      io.in(user.roomId).emit('PLAYER_LIST', players, rooms[user.roomId])
     })
 
     async function leaveRoom(roomId) {

@@ -7,7 +7,13 @@
       <div class="header_container">
         <!-- <div class="main_title">Multiplayer 1A2B Guessing Number</div> -->
         <div class="roomId">房間號碼：{{roomId}}</div>
-        <div class="player">房內玩家：Alice、Bob</div>
+        <div class="player">
+          <span>房內玩家：</span>
+          <span
+            :key="index"
+            v-for="(player, index) in players"
+          >{{`${player} `}}</span>
+        </div>
         <div
           class="button"
           v-if="isGameOver"
@@ -215,6 +221,7 @@
         // room data
         user: null,
         roomId: this.$route.params.roomId,
+        players: [],
         systemLog: [],
         target: '',
         isTargetSent: false,
@@ -335,6 +342,10 @@
         this.$router.replace({
           name: 'multi_guess_AB_login'
         })
+      })
+      this.$socket.emit('CLIENT_JOIN_ROOM_SUCCESS', this.roomId)
+      this.$socket.on('PLAYER_LIST', data => {
+        this.players = data
       })
       this.$socket.on('IS_ROOM_MANAGER', status => {
         this.isRoomManager = status
