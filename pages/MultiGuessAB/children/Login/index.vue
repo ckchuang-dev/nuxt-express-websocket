@@ -13,9 +13,19 @@
       <input
         v-model="user.password"
         type="password"
+        @keyup.enter="submitLoginData"
       >
     </div>
     <button @click="submitLoginData">送出</button>
+    <div class="user_list">
+      <div class="instruction">以下為尚可以使用的假帳號，帳號密碼皆為 id。</div>
+      <div
+        :key="user.id"
+        v-for="user in userList"
+      >
+        <div v-if="!user.isOnline">{{user.id}}<br></div>
+      </div>
+    </div>
 
   </div>
 </template>
@@ -31,7 +41,8 @@
         user: {
           account: '',
           password: ''
-        }
+        },
+        userList: []
       }
     },
     methods: {
@@ -40,6 +51,10 @@
       }
     },
     mounted() {
+      this.$socket.emit('GET_USER_LIST')
+      this.$socket.on('UPDATE_USER_LIST', users => {
+        this.userList = users
+      })
       this.$socket.on('LOGIN_SUCCESS', () => {
         this.$router.replace({
           name: 'multi_guess_AB_main'

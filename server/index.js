@@ -118,6 +118,11 @@ async function start() {
     const socketId = socket.id
     // console.log(`${socketId} connected!`)
 
+    socket.on('GET_USER_LIST', async () => {
+      users = await getUsers()
+      io.to(socketId).emit('UPDATE_USER_LIST', users)
+    })
+
     socket.on('LOGIN_USER', async function(inputUser) {
       users = await getUsers()
       if (users) {
@@ -135,6 +140,8 @@ async function start() {
               }
               await updateUser(user)
               io.to(socketId).emit('LOGIN_SUCCESS')
+              users = await getUsers()
+              socket.broadcast.emit('UPDATE_USER_LIST', users)
             }
           }
         }
@@ -148,11 +155,13 @@ async function start() {
         io.to(socketId).emit('LOGIN_FAIL', '你尚未登入！')
       }
     })
-    socket.on('LOGOUT_USER', function() {
+    socket.on('LOGOUT_USER', async function() {
       if (user) {
         user.isOnline = false
         user.socketId = ''
         updateUser(user)
+        users = await getUsers()
+        socket.broadcast.emit('UPDATE_USER_LIST', users)
       }
     })
 
@@ -164,6 +173,8 @@ async function start() {
         user.isOnline = false
         user.socketId = ''
         await updateUser(user)
+        users = await getUsers()
+        socket.broadcast.emit('UPDATE_USER_LIST', users)
       }
     })
 
