@@ -11,23 +11,21 @@
       </div>
 
     </header>
-    <hr>
     <h3>房間列表</h3>
-    <button @click="joinRoom('1')">Room 1</button>
-    <button @click="joinRoom('2')">Room 2</button>
-    <button @click="joinRoom('3')">Room 3</button>
-    <button @click="joinRoom('4')">Room 4</button>
-    <button @click="joinRoom('5')">Room 5</button>
-    <button @click="joinRoom('6')">Room 6</button>
-    <button @click="joinRoom('7')">Room 7</button>
-    <!-- <hr>
-    <h3>在線玩家列表</h3>
-    <div
-      :key="item.socketId"
-      v-for="item in userList"
-    >
-      <div>{{item.nickname}}</div>
-    </div> -->
+    <div class="room_list">
+      <div
+        class="room"
+        :key="room.id"
+        v-for="room in roomList"
+      >
+        <button
+          @click="joinRoom(room.id)"
+          :disabled="checkRoomStatus(room.id)"
+        >{{`Room ${room.id}`}}</button>
+        <div v-if="room.player1">{{`P1: ${room.player1.nickname}`}}</div>
+        <div v-if="room.player2">{{`P2: ${room.player2.nickname}`}}</div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -40,12 +38,21 @@
     data() {
       return {
         user: null,
-        userList: []
+        roomList: []
       }
     },
     methods: {
       joinRoom(roomId) {
         this.$socket.emit('JOIN_ROOM', roomId)
+      },
+      checkRoomStatus(roomId) {
+        const i = roomId - 1
+        return (
+          this.roomList &&
+          this.roomList[i] &&
+          this.roomList[i].player1 &&
+          this.roomList[i].player2
+        )
       },
       logoutUser() {
         this.$socket.emit('LOGOUT_USER')
@@ -56,6 +63,9 @@
     },
     mounted() {
       this.$socket.emit('LOGIN_SUCCESS')
+      this.$socket.on('UPDATE_ROOM_DATA', data => {
+        this.roomList = data
+      })
       this.$socket.on('INIT_USER_DATA', data => {
         this.user = data
       })

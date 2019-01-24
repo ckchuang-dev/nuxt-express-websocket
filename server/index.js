@@ -118,6 +118,11 @@ async function start() {
     const socketId = socket.id
     // console.log(`${socketId} connected!`)
 
+    socket.on('GET_USER_LIST', async () => {
+      users = await getUsers()
+      io.to(socketId).emit('UPDATE_USER_LIST', users)
+    })
+
     socket.on('LOGIN_USER', async function(inputUser) {
       users = await getUsers()
       if (users) {
@@ -135,24 +140,30 @@ async function start() {
               }
               await updateUser(user)
               io.to(socketId).emit('LOGIN_SUCCESS')
+              users = await getUsers()
+              socket.broadcast.emit('UPDATE_USER_LIST', users)
             }
           }
         }
       }
     })
 
-    socket.on('LOGIN_SUCCESS', function() {
+    socket.on('LOGIN_SUCCESS', async function() {
       if (user) {
         io.to(socketId).emit('INIT_USER_DATA', user)
+        rooms = await getRooms()
+        io.to(socketId).emit('UPDATE_ROOM_DATA', rooms)
       } else {
         io.to(socketId).emit('LOGIN_FAIL', '你尚未登入！')
       }
     })
-    socket.on('LOGOUT_USER', function() {
+    socket.on('LOGOUT_USER', async function() {
       if (user) {
         user.isOnline = false
         user.socketId = ''
         updateUser(user)
+        users = await getUsers()
+        socket.broadcast.emit('UPDATE_USER_LIST', users)
       }
     })
 
@@ -164,6 +175,8 @@ async function start() {
         user.isOnline = false
         user.socketId = ''
         await updateUser(user)
+        users = await getUsers()
+        socket.broadcast.emit('UPDATE_USER_LIST', users)
       }
     })
 
@@ -193,18 +206,32 @@ async function start() {
           await updateUser(user)
           io.to(socketId).emit('JOIN_ROOM_SUCCESS', roomId)
           if (user && user.nickname) {
-            socket
-              .to(roomId)
-              .emit(
-                'SYSTEM_LOG',
-                `[系統] ${user.nickname} 加入了房間`,
-                rooms[roomId]
-              )
-            // console.log(`${user.nickname} 加入了 ${roomId}`)
+            io.in(user.roomId).emit(
+              'SYSTEM_LOG',
+              `[系統] ${user.nickname} 加入了房間`,
+              rooms[user.roomId]
+            )
           }
           rooms = await getRooms()
+          io.emit('UPDATE_ROOM_DATA', rooms)
         }
       }
+    })
+
+    async function updatePlayerList() {
+      rooms = await getRooms()
+      const players = []
+      if (rooms && rooms[roomIndex] && rooms[roomIndex].player1) {
+        players.push(rooms[roomIndex].player1.nickname)
+      }
+      if (rooms && rooms[roomIndex] && rooms[roomIndex].player2) {
+        players.push(rooms[roomIndex].player2.nickname)
+      }
+      io.in(user.roomId).emit('PLAYER_LIST', players, rooms[user.roomId])
+    }
+
+    socket.on('CLIENT_JOIN_ROOM_SUCCESS', async () => {
+      updatePlayerList()
     })
 
     async function leaveRoom(roomId) {
@@ -220,6 +247,8 @@ async function start() {
             player1: null
           }
           await updateRoom(room)
+          io.in(user.roomId).emit('RESET_GAME')
+          resetGameData()
         } else if (
           rooms[roomIndex].player2 &&
           rooms[roomIndex].player2.socketId &&
@@ -230,7 +259,10 @@ async function start() {
             player2: null
           }
           await updateRoom(room)
+          io.in(user.roomId).emit('RESET_GAME')
+          resetGameData()
         }
+        await updatePlayerList()
         socket.leave(roomId)
         delete user.roomId
         await updateUser(user)
@@ -246,6 +278,7 @@ async function start() {
           // console.log(`${user.nickname} 退出了 ${roomId}`)
         }
         rooms = await getRooms()
+        io.emit('UPDATE_ROOM_DATA', rooms)
         roomIndex = -1
       }
     }
@@ -386,18 +419,18 @@ async function start() {
       let room = {
         ...rooms[roomIndex]
       }
-      if (room.player1 && room.player1.target) {
+      if (room && room.player1) {
         delete room.player1.target
         delete room.player1.ready
+        delete room.player1.restart
+      }
+      if (room && room.player2) {
         delete room.player2.target
         delete room.player2.ready
-        if (room.player1.restart && room.player2.restart) {
-          delete room.player1.restart
-          delete room.player2.restart
-        }
-        await updateRoom(room)
-        rooms = await getRooms()
+        delete room.player2.restart
       }
+      await updateRoom(room)
+      rooms = await getRooms()
     }
 
     socket.on('SEND_GUESSING', async function(guessing, isPlayer1) {
