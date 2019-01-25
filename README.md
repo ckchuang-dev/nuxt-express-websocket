@@ -1,20 +1,27 @@
-# nuxt-express-websocket
+# WebSocket Game
 
-> A experiment project about websocket based on Nuxt and Express.
+> A experiment project about websocket based on Vue/Nuxt, Node.js/Express, and Socket.io.
 
-## Build Setup
+## Demo
 
-```bash
-# install dependencies
-$ yarn install
+![WebSocket Game demo picture](./doc/guessDemo.png)
 
-# serve with hot reload at localhost:3000
-$ yarn run dev
 
-# build for production and launch server
-$ yarn run build
-$ yarn start
+## Usage
 
-# generate static project
-$ yarn run generate
+### json-server
+
+Used [json-server](https://github.com/typicode/json-server) as temporal data server.
+
 ```
+json-server -p 4000 ./json-server/db.json
+```
+
+### Nuxt server
+
+```
+yarn
+yarn dev
+```
+
+After setting up those steps above, you could login with fake user with account/password pair like "1/1".
